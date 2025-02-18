@@ -97,7 +97,7 @@ Example Output:
     
       <div className="border border-gray-300 flex flex-col m-8 lg:m-12 p-2 gap-4  ">
         <label className="text-xl text-blue-500 font-bold ">Initial information</label>
-        <textarea className = "border border-gray-200 outline-none p-2"
+        <textarea className = "border border-gray-200 outline-none p-2 text-black"
         onChange={(e)=>setinitial_info(e.target.value)}
         value={initial_info}
         placeholder="Enter your complaint information"
