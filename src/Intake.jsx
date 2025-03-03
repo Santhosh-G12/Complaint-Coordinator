@@ -137,8 +137,8 @@ Example Output:
       </div>
       <div className='text-white'>
         <select  className = "bg-black" onChange ={(e)=>setselectedproduct(e.target.value)} value={selectedproduct}>
-          <option>ISD 1 - Alaris</option>
-          <option>ISD 2 - Disposable</option>
+          <option value="CPR-130-ISD-001 - Alaris and Gemini Infusion Sets">ISD 1 - Alaris</option>
+          <option value = "CPR-130-ISD-002 - Extension Sets">ISD 2 - Extenstion sets</option>
           <option  value="CPR-130-MDS-001 - Injection Systems: Hypodermic (2 pc, 3pc, Emerald Syringes)">MDS 1 - Hypodermic (2 pc, 3pc, Emerald Syringes)</option>
           <option value="CPR-130-MDS-002 - Injection Systems: Hypodermic (Safety Syringes / Needles)">MDS 2 - Hypodermic (Safety Syringes / Needles)</option>
           <option value="CPR-130-MDS-003 - Injection Systems: Hypodermic (Orals, Enteral, Tip Caps)">MDS 3 - Hypodermic (Orals, Enteral, Tip Caps)</option>
