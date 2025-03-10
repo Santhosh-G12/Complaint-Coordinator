@@ -1,19 +1,36 @@
 
-import './App.css';
-import { useState} from "react"
-import eventtype from "./product_event_map.json"
+import '../App.jsx';
+import { useContext, useState, useEffect} from "react"
+import eventtype from "../product_event_map.json"
 import LinearProgress from '@mui/material/LinearProgress';
 import { Button, CircularProgress } from '@mui/material';
 import PropTypes from 'prop-types'
+import { AppContext } from '../App.jsx';
 
 
-function  Intake({asReportedcode,setasReportedcode,selectedproduct,setselectedproduct}) {
+
+function  Intake() {
+  console.log("Intake mounted")
   const apiKey = '031a052329241fa8365571d6e816ab01824905f89adac9875c66f54d858e5283'
-  
+  const {asReportedcode,setasReportedcode,selectedproduct,setselectedproduct} = useContext(AppContext)
   const [initial_info , setinitial_info] = useState("")
   const [Output,setOutput] =useState({})
   const [loading, setloading] =useState(false)
   const [filteredevent_types , setfilteredevent_types] = useState({})
+
+  useEffect(() => {
+    console.log('Intake Component Mounted');
+  }, []);
+
+  useEffect(()=>{
+    if(selectedproduct){
+      setselectedproduct(selectedproduct)
+      const filtered = eventtype[selectedproduct] || []
+      setfilteredevent_types(filtered)
+      console.log(filteredevent_types)
+    
+    }
+  },[selectedproduct])
 
 
   const hitter = async()=>{
@@ -30,45 +47,48 @@ JSON Output Structure:
 {
 "Material": "Extract the material number or product code. If no information is found, return 'Unknown'.",
 "Lot": "Extract the batch or lot number. If no information is found, return 'Unknown'.",
+"Entry Description": "Format this field as: 'Material : [found material number or 'Unknown']       Batch : [found batch number or 'Unknown'] It was reported by the customer that the [rephrased reported issue].' Ensure consistent spacing.",
 "Reported Issue": "Summarize each issue reported by the customer as a numbered list. If multiple issues are mentioned, clearly separate them into distinct points.",
 "Patient Harm": "Indicate whether there was any harm to the patient or healthcare professional. If yes, provide details. If no harm is mentioned, return 'No harm reported.'",
 "Date of Event": "Extract the date of the incident in MM/DD/YYYY format. If no date is found, return 'Unknown'.",
-"Sample Information": "Indicate whether a sample is available for investigation. If yes, include any relevant details. If no information is found, return 'Unknown'.",
+"Sample Information": "Indicate whether a sample is available for investigation. If the complaint explicitly mentions that the product was thrown away, discarded, or disposed of, return 'No sample available due to disposal.' Otherwise, if no information is found, return 'Unknown'.",
 "Follow-up Questions": ["Generate a list of follow-up questions to gather additional information."],
 "No of issues": "Count the number of distinct issues stated in the 'Reported Issue' field. Return the exact count as a number (e.g., 1, 2, 3). If no issues are mentioned, return 0.",
 "Email id": "Extract the email address mentioned for further communication. If no email is found, return 'Unknown'.",
-"Explanation": "Provide a detailed explanation of the reported issue(s) based on the complaint description.",
+"Explanation": "Help me to understand the complaint in depth as much as possible that help me to understad the issue btter . Give me indepth explaintion .",
 "Mapped Codes": "Map the reported issues ONLY to the predefined codes in the Filtered Event Types. Do not make assumptions or create new codes. If no match is found, return an empty array."
 }
 
 Inputs:
-Selected Product: ${selectedproduct}
+
 FilteredEventTypes:${filteredevent_types}
 Complaint Description: ${initial_info}
 
 Example Output:
 {
-"Material": "XYZ123",
-"Lot": "BATCH456",
+"Material": "ME2010",
+"Lot": "Unknown",
+"Entry Description": "Material : ME2010       Batch : Unknown It was reported by the customer that the tubing gets stuck when connected to an IV or t-piece set and can break off completely when being removed.",
 "Reported Issue": [
-"1. Leakage occurred at the connection site.",
-"2. The syringe tip cap was difficult to remove."
+"1. The tubing gets stuck when connected to an IV or t-piece set.",
+"2. The tubing can break off completely when being removed."
 ],
 "Patient Harm": "No harm reported.",
-"Date of Event": "01/15/2023",
-"Sample Information": "Sample available for investigation.",
+"Date of Event": "Unknown",
+"Sample Information": "Unknown",
 "Follow-up Questions": [
-"Can you provide more details about the leakage?",
-"Was the syringe used according to instructions?"
+"Can you confirm the date of the event?",
+"Was there any harm to the patient or healthcare professional?",
+"Is a sample available for investigation?"
 ],
 "No of issues": 2,
-"Email id": "user@example.com ",
-"Explanation": "The customer reported leakage at the connection site and difficulty removing the tip cap.",
+"Email id": "Unknown",
+"Explanation": "Help me to understand the complaint in depth as much as possible that help me to understad the issue btter . Give me indepth explaintion explain the medical term used.",
 "Mapped Codes": [
-"LEAKAGE AT CONNECTION SITE",
-"TIP CAP/SHIELD DIFFICULT OR CANNOT BE REMOVED"
+"TUBING STUCK WHEN CONNECTED TO IV OR T-PIECE SET",
+"TUBING BREAKS OFF COMPLETELY WHEN REMOVED"
 ]
-} 
+}     
 `;
 
     try{
@@ -115,28 +135,28 @@ Example Output:
   
   return (
     
-    <div className='w-full h-full flex flex-col bg-black text-white'>
-      <h1 className="text-2xl text-blue-500 w-full bg-blue-400 h-12 ">TrackX</h1>
+    <div className='w-full h-full flex flex-col bg-black text-white '>
+      
       {loading?<LinearProgress/>:""}
       
     
-      <div className="border border-gray-300 flex flex-col m-8 lg:m-12 p-2 gap-4  ">
-        <label className="text-xl text-blue-500 font-bold ">Initial information</label>
-        <textarea className = "border border-gray-200 outline-none p-2 text-black"
+      <div className=" flex flex-col m-8 lg:m-12  gap-4 mb-8 bg-black rounded-lg border border-blue-100 p-6 ">
+        <label className="text-2xl text-blue-500 font-medium ">Initial information</label>
+        <textarea className = "w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent text-gray-200 placeholder-gray-500 resize-y transition-colors duration-200"
         onChange={(e)=>setinitial_info(e.target.value)}
         value={initial_info}
         placeholder="Enter your complaint information"
         />
       <div className="buttons flex gap-3 ">
-        <button className ="bg-blue-400 h-14 w-28 font-bold rounded-2xl p-2 text-lg" onClick={hitter}>
+        <button className ="px-4 py-1 bg-blue-700 hover:bg-blue-600 text-gray-100 rounded-md text-sm transition-colors duration-200" onClick={hitter}>
           {loading?<CircularProgress/>:"Submit"}
           
           </button>
       
-        <button className="bg-slate-300 h-14 w-28 font-bold rounded-2xl p-2 text-lg" >Clear</button>
+        <button className="bg-300 h-14 w-28 font-bold rounded-2xl p-2 text-lg" >Clear</button>
       </div>
-      <div className='text-white'>
-        <select  className = "bg-black" onChange ={(e)=>setselectedproduct(e.target.value)} value={selectedproduct}>
+      <div className='text-white font-medium'>
+        <select  className = "bg-black font-bold text-xl" onChange ={(e)=>setselectedproduct(e.target.value)} value={selectedproduct}>
           <option value="CPR-130-ISD-001 - Alaris and Gemini Infusion Sets">ISD 1 - Alaris</option>
           <option value = "CPR-130-ISD-002 - Extension Sets">ISD 2 - Extenstion sets</option>
           <option  value="CPR-130-MDS-001 - Injection Systems: Hypodermic (2 pc, 3pc, Emerald Syringes)">MDS 1 - Hypodermic (2 pc, 3pc, Emerald Syringes)</option>
@@ -173,34 +193,51 @@ Example Output:
         <Button onClick={mapper}>ok</Button>
       </div>
       
-      <label className="text-xl text-blue-500 font-bold">Output</label>
+      <label className="text-2xl font-semibold text-gray-100 mb-6">Output</label>
 
      
-      <div className='flex gap-3 flex-wrap' >
+      <div className='text-xl  text-gray-100 mb-6 font-medium' >
         
-        <div>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12  '>
           {Object.entries(Output).map(([field,value],index)=>{
             return Array.isArray(value)?(
-              <div  className="order">
-                <h1>{field}</h1>
-                  {value.map((unique,idx)=>(
-                    <div key={idx} className="orders">
-                      
-                      <p>{unique}</p>
-                    </div>
-                  ))}
+              <div  className= "bg-transparent rounded-lg overflow-hidden shadow border border-gray-200 ">
+                
+                <div className="bg-blue-800 text-gray-100 px-4 py-2 font-semibold">
+                {field.charAt(0).toUpperCase() + field.slice(1)}
               </div>
+              {field ==="Mapped Codes"?(
+                value.map((unique,idx)=>(
+                  <div key={idx} className="divide-y divide-gray-700 flex justify-between">
+                    
+                    <h1 className='py-2 px-3 text-gray-300 font-medium divide-y divide-gray-700'>{unique}</h1>
+                    <button className='bg-red-500 rounded-lg mr-2 w-11 h-full m-2 font-medium'>Edit</button>
+                  
+                  </div>
+                ))
+
+              ):(
+                value.map((unique,idx)=>(
+                  <div key={idx} className="divide-y divide-gray-700 ">
+                    
+                    <p className='py-2 px-3 text-gray-300'>{unique}</p>
+                  </div>
+                ))
+            
+              )}
+               </div>   
             ):(
-              <div key= {index} className="div">
-                <h1>{field}</h1>
-                <p>{value}</p>
+              <div key= {index} className="bg-tranparent rounded-lg overflow-hidden shadow border border-gray-200">
+                 <div className="bg-blue-800 text-gray-100 px-4 py-2 font-semibold">
+                {field.charAt(0).toUpperCase() + field.slice(1)}
+              </div>
+                <p className='py-2 px-3 text-gray-300'>{value}</p>
               </div>
             );
             
 })}
         
-      <p>Hi</p>
-      <p>{asReportedcode}</p>
+     
         </div>
         
         
