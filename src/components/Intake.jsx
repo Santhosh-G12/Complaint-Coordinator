@@ -10,7 +10,7 @@ import { AppContext } from '../App.jsx';
 
 
 function  Intake() {
-  console.log("Intake mounted")
+  
   const apiKey = '031a052329241fa8365571d6e816ab01824905f89adac9875c66f54d858e5283'
   const {asReportedcode,setasReportedcode,selectedproduct,setselectedproduct} = useContext(AppContext)
   const [initial_info , setinitial_info] = useState("")
