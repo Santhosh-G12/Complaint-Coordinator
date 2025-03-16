@@ -2740,7 +2740,7 @@
       "If Yes, Type of MDR": "NA",
       "Reportable Determination Rationale": "Multiple units in a single unit package does not affect the usability of the device. The user would still be able to use the device."
     },
-    "INCORRECT DEVICE RECEIVED (IE\u2026ORDERED 20G BUT RECEIVED 18G)": {
+    "INCORRECT DEVICE RECEIVED (IE...ORDERED 20G BUT RECEIVED 18G)": {
       "Presumptively Reportable": "No",
       "If Yes, Type of MDR": "NA",
       "Reportable Determination Rationale": "A clinician would visualize that an incorrect device was received. No adverse health consequences: may result in annoyance to user or to patient and would not lead to harm or serious injury."

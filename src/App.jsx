@@ -1,42 +1,53 @@
 // App.jsx
-import { createContext, useState, useMemo, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, Outlet } from 'react-router-dom';
+import { createContext, useState } from 'react';
+import { BrowserRouter, Routes, Route, Link,  } from 'react-router-dom';
 import Intake from './components/Intake.jsx';
 import DT from './components/DT.jsx';
 import Hero from './components/Hero.jsx';
 import Footer from './components/Footer.jsx';
+
 
 // Create the Context
 export const AppContext = createContext();
 
 // Provide the App Context
 export function AppProvider({ children }) {
-  console.log('AppProvider Mounted');
+  
+ 
+//Varibles
+  const [asReportedcode, setasReportedcode] = useState([])
+  const [selectedproduct, setselectedproduct] = useState("")
+  const [initial_info,setinitial_info] = useState("")
+  const [Output,setOutput] = useState({})
+  
+ 
 
-  const [asReportedcode, setasReportedcode] = useState([]);
-  const [selectedproduct, setselectedproduct] = useState('');
-
-  const values = {
-    asReportedcode,
-    setasReportedcode,
-    selectedproduct,
-    setselectedproduct
-  }
+  const values = 
+    {
+      asReportedcode,
+      setasReportedcode,
+      selectedproduct,
+      setselectedproduct,
+      initial_info,
+      setinitial_info,
+      Output,
+      setOutput
+    }
+ 
 
   return <AppContext.Provider value={values}>{children}</AppContext.Provider>;
 }
-
-// Persistent Layout Component
-
 // Main App Component
 function App() {
+  const [selectedTab,setSelectedTab] = useState("Home")
+
   return (
     <BrowserRouter>
    
-        <nav>
-          <Link to="/" className="bg-blue-500">Home</Link>
-          <Link to="/Intake" className="bg-red-200">Intake</Link>
-          <Link to="/DT" className="bg-red-200">DT</Link>
+        <nav className='flex font-medium w-full bg-black  gap-5 p-5 '>
+          <Link onClick={()=>setSelectedTab("Home")} to="/" className={selectedTab==="Home"?" px-4 py-4 bg-blue-500 border-blue-500 text-blue-400 w-36 text-center border rounded-lg bg-opacity-25 text-xl  ":"px-4 py-4 w-36 text-center hover:text-blue-500 rounded-lg bg-opacity-25 text-xl text-white"}>Home</Link>
+          <Link onClick={()=>setSelectedTab("Intake")} to="/Intake" className={selectedTab==="Intake"?" px-4 py-4 bg-blue-500 border-blue-500 text-blue-400 w-36 text-center border rounded-lg bg-opacity-25 text-xl  ":"px-4 py-4 w-36 text-center hover:text-blue-500 rounded-lg bg-opacity-25 text-xl text-white "}>Intake</Link>
+          <Link onClick={()=>setSelectedTab("DT")} to="/DT" className={selectedTab==="DT"?" px-4 py-4 bg-blue-500 border-blue-500 text-blue-400 w-36 text-center border rounded-lg bg-opacity-25 text-xl  ":"px-4 py-4 w-36 text-center hover:text-blue-500 rounded-lg bg-opacity-25 text-xl text-white"} >DT</Link>
         </nav>
         <Routes>
             <Route path="/" element={<Hero />} />
