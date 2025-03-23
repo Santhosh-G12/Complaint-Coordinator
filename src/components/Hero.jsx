@@ -1,51 +1,38 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import React from "react";
 
-const Hero = () => {
+export default function Frame() {
   return (
-    <div>
-      <section className="relative overflow-hidden py-20 bg-gradient-to-b from-gray-900 via-blue-900 to-gray-900">
-    
-    <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10">
-      <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-blue-400"></div>
-      <div className="absolute bottom-20 right-20 w-64 h-64 rounded-full bg-blue-600"></div>
-      <div className="absolute top-40 right-40 w-20 h-20 rounded-full bg-blue-300"></div>
-    </div>
-    
-    <div className="container mx-auto px-4 relative z-10">
-      <div className="flex flex-col md:flex-row items-center">
-        <div className="md:w-1/2 mb-10 md:mb-0">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">Transform Complaints into <span className="text-blue-400">Opportunities</span></h2>
-          <p className="text-xl text-blue-100 mb-8">Streamline your complaint management process with our intuitive platform designed to improve resolution times and customer satisfaction.</p>
-          <div className="flex flex-wrap gap-4">
-            <a href="#" className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg shadow-lg transition duration-200 font-bold text-white">Get Started</a>
-            <a href="#" className="bg-transparent border-2 border-blue-400 hover:bg-blue-800 px-6 py-3 rounded-lg transition duration-200 font-bold text-blue-200">Watch Demo</a>
-          </div>
-        </div>
-        <div className="md:w-1/2 flex justify-center">
-          <div className="relative bg-gray-800 p-6 rounded-xl shadow-2xl border border-blue-800 w-full max-w-md">
-            <div className="absolute -top-3 -right-3 bg-blue-600 text-white text-sm px-3 py-1 rounded-full">New</div>
-            <h3 className="text-xl font-semibold text-blue-100 mb-4">Quick Complaint Entry</h3>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="block text-blue-300 text-sm">Category</label>
-                <select className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white">
-                  <option>Product Defect</option>
-                  <option>Service Issue</option>
-                  <option>Billing Problem</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-blue-300 text-sm">Description</label>
-                <textarea className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white h-24"></textarea>
-              </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-bold">Submit Complaint</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-    </div>
-  )
-}
+    <main className="bg-transparent flex flex-row justify-center w-full min-h-screen">
+      <section className="bg-[url(/frame-2.png)] bg-cover bg-center w-full max-w-[1280px] h-[832px] relative flex flex-col">
+        <header className="mt-0 ml-[23px]">
+          <h1 className="font-bold text-[#d9d9d9] text-5xl tracking-[0] leading-normal font-['Outfit-Bold',Helvetica]">
+            Complaint Coordinator
+          </h1>
+        </header>
 
-export default Hero
+        <div className="flex flex-col items-center justify-center flex-grow">
+          <Card className="bg-transparent border-none shadow-none max-w-2xl">
+            <CardContent className="p-0">
+              <h2 className="text-4xl font-bold mb-6 text-white">
+                Turn Complaints into Solutions with{" "}
+                <span className="text-[#b7d3dd]">AI-Powered Insights</span>
+              </h2>
+
+              <p className="w-[787px] rotate-[-0.02deg] text-shadow-md font-normal italic text-[#22293a] text-2xl tracking-[0] leading-normal font-['Inter-Italic',Helvetica]">
+                I am your Complaint Coordinator !!!
+              </p>
+            </CardContent>
+          </Card>
+
+          <Button className="w-[411px] h-[76px] mt-16 bg-[#b7d3dd] rounded-[15px] hover:bg-[#a6c2cc] transition-colors">
+            <span className="font-['Silkscreen-Regular',Helvetica] font-normal text-black text-[32px] tracking-[0] leading-normal">
+              Get Started !
+            </span>
+          </Button>
+        </div>
+      </section>
+    </main>
+  );
+}

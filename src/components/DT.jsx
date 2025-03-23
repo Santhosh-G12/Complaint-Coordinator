@@ -1,6 +1,6 @@
 import PropTypes from "prop-types"
 import { useState, useContext, useEffect } from "react"
-import CPR from '../CPR.json'
+import CPR from '../NEW.json'
 import { AppContext } from '../App.jsx';
 import eventtype from "../product_event_map.json"
 
@@ -65,14 +65,14 @@ const DT = () => {
 
 
       const final_op =
-        `
-Description of the event/incident:
+              
+`Description of the event/incident:
 
-Verbatim: ${event_description}
+Verbatim: "${event_description}"
 
 Reportability Determination Rationale: ${rationale}
 
-${isReportable ? ("This complaint is MDR reportable") : ("This complaint is not MDR reportable. There was no report of serious injury, medical intervention, or reportable device malfunction"
+${isReportable ? ("This complaint is MDR reportable.") : ("This complaint is not MDR reportable. There was no report of serious injury, medical intervention, or reportable device malfunction."
         )}
 
 Event Type: ${code} 
@@ -192,7 +192,7 @@ Event Type: ${code}
 }
 DT.propTypes = {
   asReportedcode: PropTypes.array.isRequired,
-  selectedproduct: PropTypes.string.isRequired
+  selectedproduct: PropTypes.string
 }
 
 export default DT
