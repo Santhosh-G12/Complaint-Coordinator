@@ -7,35 +7,56 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { Button, CircularProgress } from '@mui/material';
 import PropTypes from 'prop-types'
 import { AppContext } from '../App.jsx';
-
+import NewEvents from '../NewEvents.json'
+import Master from '../Master.json'
 
 
 
 function Intake() {
 
   const apiKey = '031a052329241fa8365571d6e816ab01824905f89adac9875c66f54d858e5283'
-  const { asReportedcode, setasReportedcode, selectedproduct, setselectedproduct, initial_info, setinitial_info, Output, setOutput } = useContext(AppContext)
+  const { asReportedcode, setasReportedcode, selectedproduct, setselectedproduct, initial_info, setinitial_info, Output, setOutput, isNewversion, setisNewversion } = useContext(AppContext)
   const [loading, setloading] = useState(false)
   const [filteredevent_types, setfilteredevent_types] = useState({})
   const [Acode, setAcode] = useState([])
+  const [source, setSource] = useState(Master)
+  const [materialGrid, setmaterialGrid] = useState([])
+
+  useEffect(() => {
+    if (!isNewversion) {
+      setSource(() => CPR)
+    }
+  }, [isNewversion])
+
+
 
   useEffect(() => {
     if (selectedproduct) {
       setselectedproduct(selectedproduct)
-      const filtered = eventtype[selectedproduct] || []
+      console.log(selectedproduct)
+      if (isNewversion === true) {
+        const filtered = NewEvents[selectedproduct]
+        setfilteredevent_types(filtered)
+        console.log(filtered)
+        return
+      }
+      const filtered = eventtype[selectedproduct]
       setfilteredevent_types(filtered)
-      console.log(filteredevent_types)
+      console.log(filtered)
+
 
     }
   }, [selectedproduct])
 
   useEffect(() => {
     if (asReportedcode.length > 0) {
+      if (!source || !selectedproduct) return
       setAcode([])
       const acodeArray = []
-      const x = CPR[selectedproduct]
+      const x = source[selectedproduct]
       if (!x) {
         console.error("undefined")
+        return
       }
       for (const code of asReportedcode) {
         const y = x[code]
@@ -52,11 +73,40 @@ function Intake() {
         acodeArray.push(z)
 
       }
-      setAcode((prev) => [...prev, acodeArray])
+      setAcode(acodeArray)
       console.log(Acode)
     }
 
   }, [asReportedcode])
+
+
+  //Process of Retriving As Reported code 
+  function handleARcode() {
+    let res = []
+    
+    for (const code of asReportedcode) {
+    
+
+      const arCode = Master[selectedproduct][code]["As Reported/As Analyzed Code 1"]
+      const ascode = Master[selectedproduct][code]["IMDRF Annex A (Problem) Code & Definition"]
+      
+      let rese = {
+        "dtcode" : code,
+        "arcode": arCode,
+        "ascode": ascode
+      }
+      res.push(rese)}
+    setmaterialGrid(res)
+    console.log(materialGrid)
+  }
+
+
+
+
+
+
+
+
 
 
   const hitter = async () => {
@@ -144,6 +194,7 @@ Example Output:
       setasReportedcode(finded_codes)
       console.log(`Sending the selected product ${selectedproduct}`)
       console.log(`Sending the codes ${asReportedcode}`)
+      console.log(Output)
 
     }
     catch (error) {
@@ -154,11 +205,7 @@ Example Output:
       setloading(false)
     }
   }
-  const mapper = () => {
-    const filtered = eventtype[selectedproduct] || []
-    setfilteredevent_types(filtered)
 
-  }
   function clear() {
     setOutput('')
     setinitial_info('')
@@ -184,42 +231,60 @@ Example Output:
         />
 
         <div className='text-white font-medium '>
-          <label htmlFor="dropdown" className='text-2xl text-blue-500 font-medium'>Affected Product</label>
-          <select id='dropdown' className="bg-black font-bold text-xl focus:border overflow-hidden w-full" onChange={(e) => setselectedproduct(e.target.value)} value={selectedproduct}>
-            <option >Select your Product</option>
-            <option value="CPR-130-ISD-001 - Alaris and Gemini Infusion Sets">ISD 1 - Alaris</option>
-            <option value="CPR-130-ISD-002 - Extension Sets">ISD 2 - Extenstion sets</option>
-            <option value="CPR-130-MDS-001 - Injection Systems: Hypodermic (2 pc, 3pc, Emerald Syringes)">MDS 1 - Hypodermic (2 pc, 3pc, Emerald Syringes)</option>
-            <option value="CPR-130-MDS-002 - Injection Systems: Hypodermic (Safety Syringes / Needles)">MDS 2 - Hypodermic (Safety Syringes / Needles)</option>
-            <option value="CPR-130-MDS-003 - Injection Systems: Hypodermic (Orals, Enteral, Tip Caps)">MDS 3 - Hypodermic (Orals, Enteral, Tip Caps)</option>
-            <option value="CPR-130-MDS-004 - Injection Systems: Hypodermic (Needles)">MDS 4 - Hypodermic (Needles)</option>
-            <option value="CPR-130-MDS-005 - Sharps Collectors">MDS 5 - Sharps Collectors</option>
-            <option value="CPR-130-MDS-006 - Sharps Accessories (Brackets, Cabinets, Stabilizers, Trolley)">MDS 6 - Sharps Accessories (Brackets, Cabinets, Stabilizers, Trolley)</option>
-            <option value="CPR-130-MDS-007 - Anesthesia Needles - Spinal, Specialty, Introducer">Anesthesia Needles - Spinal, Specialty, Introducer</option>
-            <option value="CPR-130-MDS-008 - Anesthesia Trays & Kit CSE, Epidural, Nerve Block, Pudendal Spinal, Support">MDS 8 - Anesthesia Trays & Kit CSE, Epidural, Nerve Block, Pudendal Spinal, Support</option>
-            <option value="CPR-130-MDS-009 - Anesthesia Syringes - Epilor, Glass Lor">MDS 9 - Anesthesia Syringes - Epilor, Glass Lor</option>
-            <option value="CPR-130-MDS-010 - Anesthesia Misc. - Catheters, Connectors, Accessories">MDS 10 - Anesthesia Misc. - Catheters, Connectors, Accessories</option>
-            <option value="CPR-130-MDS-011 - PhaSeal: Connectors">MDS 11 - PhaSeal: Connectors</option>
-            <option value="CPR-130-MDS-012 - PhaSeal: Protector">MDS 12 - PhaSeal: Protector</option>
-            <option value="CPR-130-MDS-013 - PhaSeal: Injector">MDS 13 - PhaSeal: Injector</option>
-            <option value="CPR-130-MDS-014 - Infusion Adapters">MDS 14 - Infusion Adapters</option>
-            <option value="CPR-130-MDS-015 - PhaSeal: Accessories">MDS 15 - PhaSeal: Accessories</option>
-            <option value="CPR-130-MDS-016 - PIVC: Conventional Catheters Non Ported - Insyte, Angiocath, Neoflon, Intima II">PIVC: Conventional Catheters Non Ported - Insyte, Angiocath, Neoflon, Intima II</option>
-            <option value="CPR-130-MDS-017 - PIVC: Conventional Catheters Ported - Venflon, Venflon I, Venflon Pro">MDS 17 - PIVC: Conventional Catheters Ported - Venflon, Venflon I, Venflon Pro</option>
-            <option value="CPR-130-MDS-019 - PIVC: Arterial Cannula">MDS 19 - PPIVC: Arterial Cannula</option>
-            <option value="CPR-130-MDS-020 - PIVC: Insyte-A">MDS 20 - PIVC: Insyte-A</option>
-            <option value="CPR-130-MDS-021 - PIVC - Insyte Autoguard & Angio Autoguard">MDS 21 - PPIVC - Insyte Autoguard & Angio Autoguard</option>
-            <option value="CPR-130-MDS-022 - PIVC - Insyte Autoguard BC">MDS 22 - PIVC - Insyte Autoguard BC</option>
-            <option value="CPR-130-MDS-023 - PIVC - Venflon Pro Safety">MDS 23 - PIVC - Venflon Pro Safety</option>
-            <option value="CPR-130-MDS-024 - PIVC - Introsyte">MDS 24 - PIVC - Introsyte</option>
-            <option value="CPR-130-MDS-025 - PIVC - Introsyte Autoguard">MDS 25 - Introsyte Autoguard</option>
-            <option value="CPR-130-MDS-026 - PIVC - Cathena">MDS 26 - PIVC - Cathena</option>
-            <option value="CPR-130-MDS-027 - PIVC - Nexiva">MDS 27 - PIVC - Nexiva</option>
-            <option value="CPR-130-MDS-028 - PIVC - SAF-T-INTIMA">MDS 28 - PIVC - SAF-T-INTIMA</option>
-            <option value="CPR-130-MDS-029 - PIVC - Nexiva Diffusics">MDS 29 - PIVC - Nexiva Diffusics</option>
-            <option value="CPR-130-MDS-030 - PIVC - PEGASUS">MDS 30 - PIVC - PEGASUS</option>
-            <option value="CPR-130-MDS-031 - Catheter Care - Prefilled & Locking Syringes">MDS 31 - Catheter Care - Prefilled & Locking Syringes</option>
-          </select>
+          {!isNewversion ?
+            <div>
+              <label htmlFor="dropdown" className='text-2xl text-blue-500 font-medium'>Affected Product</label>
+              <select id='dropdown' className="bg-black font-bold text-xl focus:border overflow-hidden w-full" onChange={(e) => setselectedproduct(e.target.value)} value={selectedproduct}>
+                <option >Select your Product</option>
+                <option value="CPR-130-ISD-001 - Alaris and Gemini Infusion Sets">ISD 1 - Alaris</option>
+                <option value="CPR-130-ISD-002 - Extension Sets">ISD 2 - Extenstion sets</option>
+                <option value="CPR-130-MDS-001 - Injection Systems: Hypodermic (2 pc, 3pc, Emerald Syringes)">MDS 1 - Hypodermic (2 pc, 3pc, Emerald Syringes)</option>
+                <option value="CPR-130-MDS-002 - Injection Systems: Hypodermic (Safety Syringes / Needles)">MDS 2 - Hypodermic (Safety Syringes / Needles)</option>
+                <option value="CPR-130-MDS-003 - Injection Systems: Hypodermic (Orals, Enteral, Tip Caps)">MDS 3 - Hypodermic (Orals, Enteral, Tip Caps)</option>
+                <option value="CPR-130-MDS-004 - Injection Systems: Hypodermic (Needles)">MDS 4 - Hypodermic (Needles)</option>
+                <option value="CPR-130-MDS-005 - Sharps Collectors">MDS 5 - Sharps Collectors</option>
+                <option value="CPR-130-MDS-006 - Sharps Accessories (Brackets, Cabinets, Stabilizers, Trolley)">MDS 6 - Sharps Accessories (Brackets, Cabinets, Stabilizers, Trolley)</option>
+                <option value="CPR-130-MDS-007 - Anesthesia Needles - Spinal, Specialty, Introducer">Anesthesia Needles - Spinal, Specialty, Introducer</option>
+                <option value="CPR-130-MDS-008 - Anesthesia Trays & Kit CSE, Epidural, Nerve Block, Pudendal Spinal, Support">MDS 8 - Anesthesia Trays & Kit CSE, Epidural, Nerve Block, Pudendal Spinal, Support</option>
+                <option value="CPR-130-MDS-009 - Anesthesia Syringes - Epilor, Glass Lor">MDS 9 - Anesthesia Syringes - Epilor, Glass Lor</option>
+                <option value="CPR-130-MDS-010 - Anesthesia Misc. - Catheters, Connectors, Accessories">MDS 10 - Anesthesia Misc. - Catheters, Connectors, Accessories</option>
+                <option value="CPR-130-MDS-011 - PhaSeal: Connectors">MDS 11 - PhaSeal: Connectors</option>
+                <option value="CPR-130-MDS-012 - PhaSeal: Protector">MDS 12 - PhaSeal: Protector</option>
+                <option value="CPR-130-MDS-013 - PhaSeal: Injector">MDS 13 - PhaSeal: Injector</option>
+                <option value="CPR-130-MDS-014 - Infusion Adapters">MDS 14 - Infusion Adapters</option>
+                <option value="CPR-130-MDS-015 - PhaSeal: Accessories">MDS 15 - PhaSeal: Accessories</option>
+                <option value="CPR-130-MDS-016 - PIVC: Conventional Catheters Non Ported - Insyte, Angiocath, Neoflon, Intima II">PIVC: Conventional Catheters Non Ported - Insyte, Angiocath, Neoflon, Intima II</option>
+                <option value="CPR-130-MDS-017 - PIVC: Conventional Catheters Ported - Venflon, Venflon I, Venflon Pro">MDS 17 - PIVC: Conventional Catheters Ported - Venflon, Venflon I, Venflon Pro</option>
+                <option value="CPR-130-MDS-019 - PIVC: Arterial Cannula">MDS 19 - PPIVC: Arterial Cannula</option>
+                <option value="CPR-130-MDS-020 - PIVC: Insyte-A">MDS 20 - PIVC: Insyte-A</option>
+                <option value="CPR-130-MDS-021 - PIVC - Insyte Autoguard & Angio Autoguard">MDS 21 - PPIVC - Insyte Autoguard & Angio Autoguard</option>
+                <option value="CPR-130-MDS-022 - PIVC - Insyte Autoguard BC">MDS 22 - PIVC - Insyte Autoguard BC</option>
+                <option value="CPR-130-MDS-023 - PIVC - Venflon Pro Safety">MDS 23 - PIVC - Venflon Pro Safety</option>
+                <option value="CPR-130-MDS-024 - PIVC - Introsyte">MDS 24 - PIVC - Introsyte</option>
+                <option value="CPR-130-MDS-025 - PIVC - Introsyte Autoguard">MDS 25 - Introsyte Autoguard</option>
+                <option value="CPR-130-MDS-026 - PIVC - Cathena">MDS 26 - PIVC - Cathena</option>
+                <option value="CPR-130-MDS-027 - PIVC - Nexiva">MDS 27 - PIVC - Nexiva</option>
+                <option value="CPR-130-MDS-028 - PIVC - SAF-T-INTIMA">MDS 28 - PIVC - SAF-T-INTIMA</option>
+                <option value="CPR-130-MDS-029 - PIVC - Nexiva Diffusics">MDS 29 - PIVC - Nexiva Diffusics</option>
+                <option value="CPR-130-MDS-030 - PIVC - PEGASUS">MDS 30 - PIVC - PEGASUS</option>
+                <option value="CPR-130-MDS-031 - Catheter Care - Prefilled & Locking Syringes">MDS 31 - Catheter Care - Prefilled & Locking Syringes</option>
+              </select>
+            </div>
+            :
+            <div>
+              <label htmlFor='new-dropdown' className='text-2xl text-blue-500 font-medium'></label>
+              <select id="dropdown" className="bg-black font-bold text-xl focus:border overflow-hidden w-full" value={selectedproduct} onChange={(e) => setselectedproduct(e.target.value)}>
+                <option value="Hypodermic">Hypodermic</option>
+                <option value="Anesthesia">Anesthesia</option>
+                <option value="Sharps">Sharps</option>
+                <option value="Flush Syringes">Flush Syringes</option>
+                <option value="PIVC">PIVC</option>
+                <option value="CPR-130-ISD-001 - Alaris and Gemini Infusion Sets">Alaris/Gemini</option>
+                <option value="CPR-130-ISD-002 - Extension Sets">Extension sets</option>
+              </select>
+            </div>
+          }
+
 
         </div>
         <div className="buttons flex gap-3 ">
@@ -229,6 +294,7 @@ Example Output:
           </button>
 
           <button onClick={clear} className="bg-300 h-14 w-28 font-bold rounded-2xl p-2 text-lg" >Clear</button>
+          <button onClick={() => setisNewversion(prev => !prev)}>Change</button>
         </div>
       </section>
 
@@ -250,7 +316,7 @@ Example Output:
                         <div key={idx} className=" flex justify-between">
 
                           <h1 className='py-2 px-3 text-gray-300 font-medium  '>{unique}</h1>
-                          <button className='bg-red-500 rounded-lg mr-2 w-11 h-full m-2 font-medium'>Edit</button>
+                          <button onClick={() => handleARcode} className='bg-red-500 rounded-lg mr-2 w-11 h-full m-2 font-medium'>Edit</button>
 
                         </div>)
 
@@ -282,7 +348,7 @@ Example Output:
             Acode.length > 0 && (
               <div className=" flex flex-col gap-3">
                 <h1 className='text-xl font-extrabold text-blue-600'>A codes</h1>
-                {Acode[0].map((code, index) => (
+                {Acode.map((code, index) => (
                   <div key={index} className="bg-gray-800  flex px-2 py-2 font-mono font-bold">
                     <h1>{code}</h1>
                   </div>
@@ -293,7 +359,40 @@ Example Output:
 
 
         </div>
+        <div>
+          <button onClick={handleARcode}>Click</button>
+          <h1>Hi</h1>
+        </div>
+        {materialGrid.length>0 &&(
+          <div>
+          <table className='border w-full justify-between'>
+            {/*Table Header */}
+            <thead className='w-full tracking-wide text-blue-500  '>
+              <tr >
+                <th className='border'>Event</th>
+                <th className='border'>Code</th>
+                <th className='border'>AsReportedcode</th>
+                <th className='border'>A code</th>
+              </tr>
+            </thead>
+            {/* Table Body */}
+            <tbody className='w-full'>
+              {materialGrid.map((code,index)=>(
+                 <tr key={index}>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{index+1}</td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.dtcode}<button className='border px-4 bg-red-600'>Edit</button></td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.ascode}</td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.arcode}</td>
+               </tr>
+              ))}
+             
+            
+            </tbody>
 
+          </table>
+        </div>
+        )}
+        
 
       </section >
     </div>

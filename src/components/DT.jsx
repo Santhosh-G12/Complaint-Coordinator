@@ -3,6 +3,7 @@ import { useState, useContext, useEffect } from "react"
 import CPR from '../NEW.json'
 import { AppContext } from '../App.jsx';
 import eventtype from "../product_event_map.json"
+import NewCPR from '../Master.json'
 
 
 const DT = () => {
@@ -11,7 +12,7 @@ const DT = () => {
     console.log('DT Component Mounted');
   }, []);
   const [event_description, seteventdescription] = useState("")
-  const { asReportedcode, setasReportedcode, selectedproduct, setselectedproduct } = useContext(AppContext)
+  const { asReportedcode, setasReportedcode, selectedproduct, setselectedproduct, isNewversion, setisNewversion } = useContext(AppContext)
   const asAnalysed_Codes = asReportedcode
   const affected_product = selectedproduct
   const allDT = {}
@@ -21,6 +22,15 @@ const DT = () => {
   const [isOpened, setisOpened] = useState(false)
   const [isaddClicked,setisaddClicked] = useState(false)
   const [ChangableIndex,setChangableIndex] = useState("")
+  const [rationaleVersion, setrationaleVersion] = useState("Reportability Determination Rationale")
+  const [reportableVersion, setreportableVersion] = useState("Reportable? Yes/No")
+
+  useEffect(()=>{
+    if(!isNewversion){
+      setrationaleVersion("Reportable Determination Rationale")
+      setreportableVersion("Presumptively Reportable")
+    }
+  },[isNewversion])
 
   {/* Function to change reported code manually*/}
 
@@ -46,22 +56,23 @@ const DT = () => {
  
   {/*creating readymade_DT */ }
   const load_DT = (asReportedcode, affected_product) => {
-    const possible_events = CPR[affected_product]
+    const events = isNewversion? NewCPR : CPR
+    const possible_events = events[affected_product]
     for (const code of asReportedcode) {
       const seperate = possible_events[code]
 
       allDT[code] = {
 
-        "Reportable Determination Rationale": seperate["Reportable Determination Rationale"],
-        "Presumptively Reportable": seperate["Presumptively Reportable"]
+        "Reportability Determination Rationale": seperate[rationaleVersion],
+        "Reportable? Yes/No": seperate[reportableVersion]
       }
 
 
     }
     const readymade_DTs = []
     Object.entries(allDT).forEach(([code, value]) => {
-      const rationale = value["Reportable Determination Rationale"]
-      const isReportable = value["Presumptively Reportable"] === "Yes"
+      const rationale = value["Reportability Determination Rationale"]
+      const isReportable = value["Reportable? Yes/No"] === "Yes"
 
 
       const final_op =
