@@ -21,7 +21,7 @@ function Intake() {
   const [Acode, setAcode] = useState([])
   const [source, setSource] = useState(Master)
   const [materialGrid, setmaterialGrid] = useState([])
-
+  const [formattedDescription,setformattedDescription] = useState("")
   useEffect(() => {
     if (!isNewversion) {
       setSource(() => CPR)
@@ -126,8 +126,10 @@ JSON Output Structure:
 "Lot": "Extract the batch or lot number. If no information is found, return 'Unknown'.",
 "Date of Event": Extract the date of the incident from the provided text. The date should be in MM/DD/YYYY format. If the date is incomplete or informal (e.g., '12-5'), interpret it as best as possible based on the context (e.g., '12-5' could mean 12/05/YYYY). If no year is specified, assume the current year. If the text mentions 'today' or 'yesterday', calculate the corresponding date based on the current date. If no valid date can be determined, return 'Unknown'.",
 "Sample Information": "Determine whether a sample is available for investigation based on the provided information. If the complaint explicitly mentions that the product was thrown away, discarded, disposed of, destroyed, given away, returned, lost, or otherwise made inaccessible, return 'No sample available due to disposal.' If the customer uses phrases indicating the product has been retained (e.g., 'saved the product,' 'kept the product,' 'set aside the product,' 'sequestered the product,' 'preserved the product,' 'stored the product,' 'retained the product,' 'kept it for testing,' 'put it away'), return 'Sample available for investigation.' If there is no clear indication of sample availability or disposal, return 'Unknown.",
-"Entry Description": "Format this field as: 'Material : [found material number or 'Unknown']       Batch : [found batch number or 'Unknown'] It was reported by the customer that the [rephrased reported issue].' Ensure consistent spacing.",
-"No of issues": "Count the number of distinct issues stated in the 'Reported Issue' field. Return the exact count as a number (e.g., 1, 2, 3). If no issues are mentioned, return 0.",
+"Entry Description":
+"Format this field as:
+Material # [found material number or 'Unknown'] Batch # [found batch number or 'Unknown']\n\nIt was reported by the customer that the [rephrased reported issue]\n\nverbatim:\n[initial_info with PHI removed — mask personal names, organization names, and other identifiers by replacing them fully with ''. For example, 'Smith' becomes '****', 'Cardinal Health' becomes '***', and 'Dr. Emily from Boston' becomes ' from ***']",
+  "No of issues": "Count the number of distinct issues stated in the 'Reported Issue' field. Return the exact count as a number (e.g., 1, 2, 3). If no issues are mentioned, return 0.",
 "Email id": "Extract the email address mentioned for further communication. If no email is found, return 'Unknown'.",
 "Reported Issue": "Summarize each issue reported by the customer as a numbered list. If multiple issues are mentioned, clearly separate them into distinct points.",
 "Patient Harm": "Indicate whether there was any harm to the patient or healthcare professional. If yes, provide details. If no harm is mentioned, return 'No harm reported.'",
@@ -149,7 +151,8 @@ Example Output:
 "No of issues": 2,
 "Email id": "Unknown",
 "Patient Harm": "No harm reported.",
-"Entry Description": "Material : ME2010       Batch : Unknown It was reported by the customer that the tubing gets stuck when connected to an IV or t-piece set and can break off completely when being removed.",
+"Entry Description": "Material : ME2010       Batch : Unknown It was reported by the customer that the tubing gets stuck when connected to an IV or t-piece set and can break off completely when being removed.
+verbatim: tubing gets stuck when connected to an IV or t-piece set and can break off completely when being removed ",
 "Reported Issue": [
 "1. The tubing gets stuck when connected to an IV or t-piece set.",
 "2. The tubing can break off completely when being removed."
@@ -189,6 +192,28 @@ Example Output:
       const aiResponse = data.choices[0].message.content
 
       const parseddata = JSON.parse(aiResponse)
+      if (parseddata["Entry Description"]) {
+        let description = parseddata["Entry Description"];
+    
+    // Find "It was reported" and insert line breaks before it
+        description = description.replace(
+       /Batch # [^\s]+/, 
+    match => `${match}\n\n`
+    );
+    
+    // Find "verbatim:" and insert line breaks before it
+          description = description.replace(
+        "verbatim:", 
+        "\n\nverbatim:\n"
+
+        
+    )
+    setformattedDescription(description);
+    } else {
+        console.error("Entry Description is undefined in the response:", formattedDescription);
+        // Handle the missing field appropriately
+    }
+      
       setOutput(parseddata)
       const finded_codes = parseddata["Mapped Codes"] || []
       setasReportedcode(finded_codes)
@@ -217,24 +242,24 @@ Example Output:
 
 
 
-    <div className='w-full min-h-screen flex flex-col bg-black text-white '>
+    <div className='w-full min-h-screen flex flex-col bg-black text-white mx-auto'>
 
       {loading ? <LinearProgress /> : ""}
 
       {/* Input Field */}
-      <section className="  flex flex-col md:flex-row  lg:flex-row justify-start lg:m-12   bg-black rounded-lg border border-gray-800 p-6 ">
+      <section className="  flex flex-col  justify-center gap-5  lg:m-12   bg-black rounded-lg border border-gray-800 p-6 ">
         <label className="text-2xl text-blue-500 font-medium ">Initial information</label>
-        <textarea className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent text-gray-200 placeholder-gray-500 resize-y transition-colors duration-200"
+        <textarea className="lg:w-[700px] lg:h-[200px] w-[300px] h-[100px] px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent text-gray-200 placeholder-gray-500 resize-y transition-colors duration-200"
           onChange={(e) => setinitial_info(e.target.value)}
           value={initial_info}
           placeholder="Enter your complaint information"
         />
 
-        <div className='text-white font-medium '>
+        <div className='text-white font-medium w-[500px]  border-gray-500 focus:border-blue-500 focus:border-5'>
           {!isNewversion ?
-            <div>
-              <label htmlFor="dropdown" className='text-2xl text-blue-500 font-medium'>Affected Product</label>
-              <select id='dropdown' className="bg-black font-bold text-xl focus:border overflow-hidden w-full" onChange={(e) => setselectedproduct(e.target.value)} value={selectedproduct}>
+            <div className='border '>
+              <label htmlFor="dropdown" className='text-2xl text-blue-500 font-medium '>Affected Product</label>
+              <select id='dropdown' className="bg-black font-bold text-1rem overflow-scroll  " onChange={(e) => setselectedproduct(e.target.value)} value={selectedproduct}>
                 <option >Select your Product</option>
                 <option value="CPR-130-ISD-001 - Alaris and Gemini Infusion Sets">ISD 1 - Alaris</option>
                 <option value="CPR-130-ISD-002 - Extension Sets">ISD 2 - Extenstion sets</option>
@@ -272,8 +297,8 @@ Example Output:
             </div>
             :
             <div>
-              <label htmlFor='new-dropdown' className='text-2xl text-blue-500 font-medium'></label>
-              <select id="dropdown" className="bg-black font-bold text-xl focus:border overflow-hidden w-full" value={selectedproduct} onChange={(e) => setselectedproduct(e.target.value)}>
+                <label htmlFor="dropdown" className='text-2xl text-blue-500 font-medium '>Affected Product</label>              <select id="dropdown" className="bg-black font-bold text-xl focus:border overflow-hidden w-full" value={selectedproduct} onChange={(e) => setselectedproduct(e.target.value)}>
+                <option className='font-light' >Select your Product</option>
                 <option value="Hypodermic">Hypodermic</option>
                 <option value="Anesthesia">Anesthesia</option>
                 <option value="Sharps">Sharps</option>
@@ -287,14 +312,14 @@ Example Output:
 
 
         </div>
-        <div className="buttons flex gap-3 ">
-          <button className={initial_info ? "px-4 py-1 bg-blue-700 hover:bg-blue-600 text-gray-100 rounded-md text-sm transition-colors duration-200" : "px-4 py-1 bg-[#cccccc] bg-opacity-70 text-[#666666] cursor-not-allowed"} disabled={initial_info ? false : true} onClick={hitter}>
+        <div className="buttons flex gap-5 text-black  justify-end ">
+          <button className={initial_info ? "px-4 py-1 bg-blue-700 hover:bg-blue-600 text-gray-100 transition-colors duration-200  h-14 w-28 font-bold rounded-2xl p-2 text-lg" : "px-4 py-1 bg-[#cccccc] bg-opacity-70 text-[#666666] cursor-not-allowed font-bold rounded-2xl p-2 text-lg h-14 w-28"} disabled={initial_info ? false : true} onClick={hitter}>
             {loading ? <CircularProgress /> : "Submit"}
 
           </button>
 
-          <button onClick={clear} className="bg-300 h-14 w-28 font-bold rounded-2xl p-2 text-lg" >Clear</button>
-          <button onClick={() => setisNewversion(prev => !prev)}>Change</button>
+          <button onClick={clear} className="bg-slate-200 h-14 w-28 font-bold rounded-2xl p-2 text-lg" >Clear</button>
+          <button className='bg-white font-bold rounded-2xl p-2 text-lg h-14 w-28  ' onClick={() => setisNewversion(prev => !prev)}>Change</button>
         </div>
       </section>
 
@@ -309,6 +334,7 @@ Example Output:
                 <div className="px-4 py-4 bg-blue-500 border-blue-500 text-blue-400   rounded-lg bg-opacity-25 text-xl  ">
                   {field.charAt(0).toUpperCase() + field.slice(1)}
                 </div>
+                {field ==="Entry Descrition"}
                 {field === "Mapped Codes" ? (
                   value.map((unique, idx) => {
                     if (unique)
@@ -361,7 +387,10 @@ Example Output:
         </div>
         <div>
           <button onClick={handleARcode}>Click</button>
-          <h1>Hi</h1>
+          
+        </div>
+        <div>
+          <textarea value={formattedDescription}></textarea>
         </div>
         {materialGrid.length>0 &&(
           <div>
