@@ -114,6 +114,14 @@ function Intake() {
     const prompt = `Extract the following information from the complaint description below and return
   ONLY a valid JSON object. Do NOT include any additional text, explanations, or formatting (e.g., Markdown backticks, unexpected tokens). Use the exact structure and default values provided below:
 
+PHI POLICY:
+Before placing any text in the "verbatim" field, **remove all PHI (Protected Health Information)**. This includes:
+- Personal names (e.g., doctors, nurses, patients) → Replace with "***"
+- Organization names (e.g., hospitals, manufacturers) → Replace with "***"
+- Locations (e.g., cities, wings, room numbers, etc.) → Replace with "***" unless medically relevant
+- Emails and phone numbers → Replace with "***"
+- Any indirect identifiers
+
 Additional Guidelines:
 Understand the complaint in depth to avoid misinterpretation, as errors may cause serious problems for our team.
 Identify as many distinct issues as possible from the complaint description.
@@ -128,8 +136,8 @@ JSON Output Structure:
 "Sample Information": "Determine whether a sample is available for investigation based on the provided information. If the complaint explicitly mentions that the product was thrown away, discarded, disposed of, destroyed, given away, returned, lost, or otherwise made inaccessible, return 'No sample available due to disposal.' If the customer uses phrases indicating the product has been retained (e.g., 'saved the product,' 'kept the product,' 'set aside the product,' 'sequestered the product,' 'preserved the product,' 'stored the product,' 'retained the product,' 'kept it for testing,' 'put it away'), return 'Sample available for investigation.' If there is no clear indication of sample availability or disposal, return 'Unknown.",
 "Entry Description":
 "Format this field as:
-Material # [found material number or 'Unknown'] Batch # [found batch number or 'Unknown']\n\nIt was reported by the customer that the [rephrased reported issue]\n\nverbatim:\n[initial_info with PHI removed — mask personal names, organization names, and other identifiers by replacing them fully with ''. For example, 'Smith' becomes '****', 'Cardinal Health' becomes '***', and 'Dr. Emily from Boston' becomes ' from ***']",
-  "No of issues": "Count the number of distinct issues stated in the 'Reported Issue' field. Return the exact count as a number (e.g., 1, 2, 3). If no issues are mentioned, return 0.",
+Material # [found material number or 'Unknown'] Batch # [found batch number or 'Unknown']It was reported by the customer that the [rephrased reported issue]Verbatim:[Paste the full initial_info text below after removing all PHI (Protected Health Information). This includes masking or removing personal names, organization names, locations, contact details, or any other identifiable information. Replace all PHI with '***'. Ensure that the entire content of initial_info is retained after PHI masking, with nothing omitted or summarized]",
+"No of issues": "Count the number of distinct issues stated in the 'Reported Issue' field. Return the exact count as a number (e.g., 1, 2, 3). If no issues are mentioned, return 0.",
 "Email id": "Extract the email address mentioned for further communication. If no email is found, return 'Unknown'.",
 "Reported Issue": "Summarize each issue reported by the customer as a numbered list. If multiple issues are mentioned, clearly separate them into distinct points.",
 "Patient Harm": "Indicate whether there was any harm to the patient or healthcare professional. If yes, provide details. If no harm is mentioned, return 'No harm reported.'",
@@ -152,7 +160,7 @@ Example Output:
 "Email id": "Unknown",
 "Patient Harm": "No harm reported.",
 "Entry Description": "Material : ME2010       Batch : Unknown It was reported by the customer that the tubing gets stuck when connected to an IV or t-piece set and can break off completely when being removed.
-verbatim: tubing gets stuck when connected to an IV or t-piece set and can break off completely when being removed ",
+Verbatim: tubing gets stuck when connected to an IV or t-piece set and can break off completely when being removed ",
 "Reported Issue": [
 "1. The tubing gets stuck when connected to an IV or t-piece set.",
 "2. The tubing can break off completely when being removed."
@@ -203,11 +211,12 @@ verbatim: tubing gets stuck when connected to an IV or t-piece set and can break
     
     // Find "verbatim:" and insert line breaks before it
           description = description.replace(
-        "verbatim:", 
-        "\n\nverbatim:\n"
+        "Verbatim:", 
+        "\n\nVerbatim:\n"
 
         
     )
+
     setformattedDescription(description);
     } else {
         console.error("Entry Description is undefined in the response:", formattedDescription);
@@ -390,7 +399,7 @@ verbatim: tubing gets stuck when connected to an IV or t-piece set and can break
           
         </div>
         <div>
-          <textarea value={formattedDescription}></textarea>
+          <textarea className='bg-gray-900 w-full min-h-96' value={formattedDescription}></textarea>
         </div>
         {materialGrid.length>0 &&(
           <div>
