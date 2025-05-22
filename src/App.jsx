@@ -4,6 +4,9 @@ import { BrowserRouter, Routes, Route, Link,  } from 'react-router-dom';
 import Intake from './components/Intake.jsx';
 import DT from './components/DT.jsx';
 import Hero from './components/Hero.jsx';
+import AI from './components/AI_Tool.jsx';
+
+
 import Footer from './components/Footer.jsx';
 
 
@@ -52,12 +55,14 @@ function App() {
             <Link onClick={()=>setSelectedTab("Home")} to="/" className={selectedTab==="Home"?" px-4 py-4 bg-blue-500 border-blue-500 text-blue-400 w-36 text-center border rounded-lg bg-opacity-25 text-xl  ":"px-4 py-4 w-36 text-center hover:text-blue-500 rounded-lg bg-opacity-25 text-xl text-white"}>Home</Link>
             <Link onClick={()=>setSelectedTab("Intake")} to="/Intake" className={selectedTab==="Intake"?" px-4 py-4 bg-blue-500 border-blue-500 text-blue-400 w-36 text-center border rounded-lg bg-opacity-25 text-xl  ":"px-4 py-4 w-36 text-center hover:text-blue-500 rounded-lg bg-opacity-25 text-xl text-white "}>Intake</Link>
             <Link onClick={()=>setSelectedTab("DT")} to="/DT" className={selectedTab==="DT"?" px-4 py-4 bg-blue-500 border-blue-500 text-blue-400 w-36 text-center border rounded-lg bg-opacity-25 text-xl  ":"px-4 py-4 w-36 text-center hover:text-blue-500 rounded-lg bg-opacity-25 text-xl text-white"} >DT</Link>
+            <Link onClick={()=>setSelectedTab("AI")} to="/AI" className={selectedTab==="AI"?" px-4 py-4 bg-blue-500 border-blue-500 text-blue-400 w-36 text-center border rounded-lg bg-opacity-25 text-xl  ":"px-4 py-4 w-36 text-center hover:text-blue-500 rounded-lg bg-opacity-25 text-xl text-white"} >AI</Link>
           </nav> 
         
           <Routes>
               <Route path="/" element={<Hero />} />
               <Route path="Intake" element={<Intake />} />
               <Route path="DT" element={<DT />} />
+              <Route path="AI" element={<AI />} />
           </Routes>
       </AppProvider>
      
