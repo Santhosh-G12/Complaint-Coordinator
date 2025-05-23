@@ -17,7 +17,7 @@ const AI_Tool = () => {
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free",
+          model: "meta-llama/Llama-Vision-Free",
           messages: [{ role: "user", content: typedText }],
           max_tokens: 1000,
         }),
@@ -50,6 +50,7 @@ const AI_Tool = () => {
         const result = raw.slice(endIndex+8).trim()
         return result
       }
+      return raw
     }
   }
 
