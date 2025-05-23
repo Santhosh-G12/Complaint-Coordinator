@@ -17,7 +17,7 @@ const AI_Tool = () => {
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "meta-llama/Llama-Vision-Free",
+          model: "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo",
           messages: [{ role: "user", content: typedText }],
           max_tokens: 1000,
         }),
