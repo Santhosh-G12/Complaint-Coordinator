@@ -1,8 +1,10 @@
 import { useState } from "react"
+import {Atom} from 'react-loading-indicators'
 
 const AI_Tool = () => {
   const [typedText,setTypedText] = useState("")
   const [response,setResponse] = useState("")
+  const [loading,setloading] = useState(false)
   const apiKey = '031a052329241fa8365571d6e816ab01824905f89adac9875c66f54d858e5283'
 
   const launcher = async () => {
@@ -10,6 +12,7 @@ const AI_Tool = () => {
 
     
     try {
+      setloading(true)
       const res = await fetch("https://api.together.ai/v1/chat/completions ", {
         method: "POST",
         headers: {
@@ -32,12 +35,14 @@ const AI_Tool = () => {
       const answer = cleaner (aiResponse)
       setResponse(answer);
       console.log(aiResponse)
+      setloading(false)
 
     } catch (err) {
       console.error(`Error: ${err.message}`);
       setResponse("");
+      setloading(false)
     } finally {
-      null
+      setloading(false)
     }
   };
   function cleaner(raw){
@@ -55,7 +60,16 @@ const AI_Tool = () => {
   }
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-black text-white p-5 border"> 
+    <div className={loading?("w-full min-h-screen flex flex-col bg-black text-white p-5 border"):("w-full min-h-screen flex flex-col bg-black  text-white p-5 border")} > 
+
+{loading && (
+        <div className="absolute inset-0 z-10 flex justify-center items-center backdrop-blur-sm bg-black/50">
+         <Atom color="white" size="large" text="" textColor="" />
+        </div>
+      )}
+
+
+
       <div className="flex border mt-10 justify-center items-center    ">
         
         <textarea  onChange={(e)=>setTypedText(e.target.value)} value={typedText} className="border   m-5 w-full  min-h-10 p-2 text-wrap bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent text-gray-200 placeholder-gray-500  " placeholder="Enter your message"/>
@@ -68,6 +82,8 @@ const AI_Tool = () => {
             {response}
           </pre>
       </div>
+      
+      
       
       
       

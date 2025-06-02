@@ -9,7 +9,7 @@ import PropTypes from 'prop-types'
 import { AppContext } from '../App.jsx';
 import NewEvents from '../NewEvents.json'
 import Master from '../Master.json'
-
+import {FileText, TriangleAlert, Package} from 'lucide-react'
 
 
 function Intake() {
@@ -251,25 +251,41 @@ Verbatim: tubing gets stuck when connected to an IV or t-piece set and can break
 
 
 
-    <div className='w-full min-h-screen flex flex-col bg-black text-white mx-auto'>
+    <div className='w-full lex flex-col bg-white text-white mx-auto'>
 
       {loading ? <LinearProgress /> : ""}
 
       {/* Input Field */}
-      <section className="  flex flex-col  justify-center gap-5  lg:m-12   bg-black rounded-lg border border-gray-800 p-6 ">
-        <label className="text-2xl text-blue-500 font-medium ">Initial information</label>
-        <textarea className="lg:w-[700px] lg:h-[200px] w-[300px] h-[100px] px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent text-gray-200 placeholder-gray-500 resize-y transition-colors duration-200"
+      <section className="  flex flex-col  justify-center   lg:m-12    bg-white rounded-xl shadow-lg border border-gray-200 ">
+        <header className='bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 block rounded-xl'>
+         
+          <h1 className='text-xl flex items-center font-semibold'>
+            <FileText className="w-5 h-5 mr-2" />
+            Incident Intake Form</h1>
+          <p className='text-blue-100 text-sm mt-1'>Provide initial incident details for AI analysis</p>
+          </header>
+
+        <div className='p-6'> 
+          <div className='space-y-6'>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <TriangleAlert className='w-4 h-4 inline   mr-1 text-orange-500'/>
+              Incident Description *</label>
+          </div>
+         
+        <textarea className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none disabled:bg-gray-50 disabled:text-gray-500"
           onChange={(e) => setinitial_info(e.target.value)}
           value={initial_info}
-          placeholder="Enter your complaint information"
-        />
+          placeholder="Describe the incident in detail (e.g., 'bent needle discovered during use')..."
+        /></div>
+        
 
-        <div className='text-white font-medium w-[500px]  border-gray-500 focus:border-blue-500 focus:border-5'>
+        <div className='text-white w-full font-medium border-gray-500 focus:border-blue-500 focus:border-5'>
           {!isNewversion ?
-            <div className='border '>
-              <label htmlFor="dropdown" className='text-2xl text-blue-500 font-medium '>Affected Product</label>
-              <select id='dropdown' className="bg-black font-bold text-1rem overflow-scroll  " onChange={(e) => setselectedproduct(e.target.value)} value={selectedproduct}>
-                <option >Select your Product</option>
+            <div className='p-6'>
+            <label htmlFor="dropdown" className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-2  '>
+              <Package className='text-blue-500 '/>
+              Affected Product *</label>              <select id="dropdown" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" value={selectedproduct} onChange={(e) => setselectedproduct(e.target.value)}>
+                <option >Select your Product - Old </option>
                 <option value="CPR-130-ISD-001 - Alaris and Gemini Infusion Sets">ISD 1 - Alaris</option>
                 <option value="CPR-130-ISD-002 - Extension Sets">ISD 2 - Extenstion sets</option>
                 <option value="CPR-130-MDS-001 - Injection Systems: Hypodermic (2 pc, 3pc, Emerald Syringes)">MDS 1 - Hypodermic (2 pc, 3pc, Emerald Syringes)</option>
@@ -305,8 +321,10 @@ Verbatim: tubing gets stuck when connected to an IV or t-piece set and can break
               </select>
             </div>
             :
-            <div>
-                <label htmlFor="dropdown" className='text-2xl text-blue-500 font-medium '>Affected Product</label>              <select id="dropdown" className="bg-black font-bold text-xl focus:border overflow-hidden w-full" value={selectedproduct} onChange={(e) => setselectedproduct(e.target.value)}>
+            <div className='p-6'>
+                <label htmlFor="dropdown" className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-2  '>
+                  <Package className='text-blue-500 '/>
+                  Affected Product *</label>              <select id="dropdown" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" value={selectedproduct} onChange={(e) => setselectedproduct(e.target.value)}>
                 <option className='font-light' >Select your Product</option>
                 <option value="Hypodermic">Hypodermic</option>
                 <option value="Anesthesia">Anesthesia</option>
@@ -321,15 +339,17 @@ Verbatim: tubing gets stuck when connected to an IV or t-piece set and can break
 
 
         </div>
-        <div className="buttons flex gap-5 text-black  justify-end ">
-          <button className={initial_info ? "px-4 py-1 bg-blue-700 hover:bg-blue-600 text-gray-100 transition-colors duration-200  h-14 w-28 font-bold rounded-2xl p-2 text-lg" : "px-4 py-1 bg-[#cccccc] bg-opacity-70 text-[#666666] cursor-not-allowed font-bold rounded-2xl p-2 text-lg h-14 w-28"} disabled={initial_info ? false : true} onClick={hitter}>
-            {loading ? <CircularProgress /> : "Submit"}
+        <div className='p-6 w-full'>
+          <button className={initial_info ? " w-full  bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-xl shadow-md transition duration-200  h-14   p-2 text-lg" :" w-full px-4 py-1 bg-[#cccccc] bg-opacity-70 text-[#666666] cursor-not-allowed font-bold rounded-2xl p-2 text-lg h-14 "} disabled={initial_info ? false : true} onClick={hitter}>
+              {loading ? <CircularProgress /> : "Analyse with AI"}
 
-          </button>
+            </button>
 
-          <button onClick={clear} className="bg-slate-200 h-14 w-28 font-bold rounded-2xl p-2 text-lg" >Clear</button>
-          <button className='bg-white font-bold rounded-2xl p-2 text-lg h-14 w-28  ' onClick={() => setisNewversion(prev => !prev)}>Change</button>
+            
+            <button className='bg-gray-200 font-bold rounded-2xl p-2 text-lg h-14 w-28 mt-5 ' onClick={() => setisNewversion(prev => !prev)}>Change</button>
         </div>
+         
+       
       </section>
 
       {/* Results Fields*/}
