@@ -142,7 +142,7 @@ Material # [found material number or 'Unknown'] Batch # [found batch number or '
 "Reported Issue": "Summarize each issue reported by the customer as a numbered list. If multiple issues are mentioned, clearly separate them into distinct points.",
 "Patient Harm": "Indicate whether there was any harm to the patient or healthcare professional. If yes, provide details. If no harm is mentioned, return 'No harm reported.'",
 "Follow-up Questions": ["Generate a list of follow-up questions to gather additional information."],
-"Explanation": "Help me to understand the complaint in depth as much as possible that help me to understad the issue btter . Give me indepth explaintion .",
+"Explanation": "Explain the issue in clear, non-technical language so someone without a medical background can understand. Break down the device's function (e.g., what a plunger or drip chamber does), describe what went wrong, and how it could impact use. Define technical terms in context. End with a plain summary beginning with 'In simple terms:' to recap the issue in everyday words.",
 "Mapped Codes": "Map the reported issues ONLY to the exact predefined codes listed in the Filtered Event Types. Do not assume, infer, or create new codes under any circumstances. If no match is found between the reported issue and the predefined codes, return an empty array ([]). Ensure that all mappings are case-sensitive and match the predefined codes exactly as they appear in the Filtered Event Types list.}
 
 Inputs:
@@ -159,11 +159,10 @@ Example Output:
 "No of issues": 2,
 "Email id": "Unknown",
 "Patient Harm": "No harm reported.",
-"Entry Description": "Material : ME2010       Batch : Unknown It was reported by the customer that the tubing gets stuck when connected to an IV or t-piece set and can break off completely when being removed.
-Verbatim: tubing gets stuck when connected to an IV or t-piece set and can break off completely when being removed ",
+"Entry Description": "Material : ME2010       Batch : Unknown IMaterial # ME2010 Batch # Unknown It was reported by the customer that the drip chamber on the IV infusion set was not filling properly during priming, leading to air bubbles entering the line. The issue was resolved by replacing the set. Verbatim: The nurse reported that the IV infusion set drip chamber was not filling properly during priming. Despite multiple attempts, the fluid level remained low and inconsistent, causing air bubbles to enter the line. The set was replaced, and the issue did not recur ",
 "Reported Issue": [
-"1. The tubing gets stuck when connected to an IV or t-piece set.",
-"2. The tubing can break off completely when being removed."
+"1. The drip chamber did not fill properly during priming.",
+    "2. Air bubbles entered the IV line due to improper priming.
 ],
 "Follow-up Questions": [
 "Can you confirm the date of the event?",
@@ -171,8 +170,7 @@ Verbatim: tubing gets stuck when connected to an IV or t-piece set and can break
 "Is a sample available for investigation?"
 ],
 
-
-"Explanation": "Please help me deeply understand the complaint or issue by providing a comprehensive explanation. Include the emotional and contextual aspects to give me a clearer sense of the situation. Break down any medical or technical terms used, offering simple definitions or analogies to ensure I fully grasp their meaning. Walk me through the details step by step, explaining the root cause, implications, and any related nuances. The goal is to leave no ambiguity and ensure I have a complete understanding of the problem—both its surface-level and underlying layers.",
+"Explanation": "This complaint is about a disposable IV infusion set. The issue occurred during 'priming', which means preparing the IV set by removing all air before use. The 'drip chamber' is a clear plastic part that helps control how fast the fluid drips. It must fill to a certain level for the device to work correctly. In this case, the drip chamber was not filling properly, even after several tries. As a result, air bubbles got into the tubing. This can be unsafe because air bubbles in IV lines can be harmful if they enter the patient’s bloodstream. However, the nurse caught the issue and replaced the IV set. In simple terms: The part of the IV set that shows the drip didn’t fill properly. This caused air to get into the tube, so the nurse used a new one instead",
 "Mapped Codes": [
 "TUBING STUCK WHEN CONNECTED TO IV OR T-PIECE SET",
 "TUBING BREAKS OFF COMPLETELY WHEN REMOVED"
@@ -353,114 +351,125 @@ Verbatim: tubing gets stuck when connected to an IV or t-piece set and can break
       </section>
 
       {/* Results Fields*/}
-      <section className=' bg-white rounded-xl overflow-hidden text-gray-100 m-11 font-medium' >
-        <header className='bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4'>
-            <h1 className='text-xl font-semibold text-white flex items-center'>
-              <CircleCheck className='w-5 h-5 mr-2'/>
-              AI Analysis Results
-            </h1>
-            <p className='className="text-green-100 text-sm mt-1'>
-            Complete incident analysis generated by AI
-            </p>
-        </header>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 bg-slate-100  '>
-          {Object.entries(Output).map(([field, value], index) => {
-            return Array.isArray(value) ? (
-              <div className="bg-transparent rounded-lg overflow-hidden shadow divide-y divide-gray-700  ">
-
-                <div className="px-4 py-4 bg-blue-500 border-blue-500 text-blue-400   rounded-lg bg-opacity-25 text-xl  ">
-                  {field.charAt(0).toUpperCase() + field.slice(1)}
-                </div>
-                {field ==="Entry Descrition"}
-                {field === "Mapped Codes" ? (
-                  value.map((unique, idx) => {
-                    if (unique)
-                      return (
-                        <div key={idx} className=" flex justify-between">
-
-                          <h1 className='py-2 px-3 text-gray-300 font-medium  '>{unique}</h1>
-                          <button onClick={() => handleARcode} className='bg-red-500 rounded-lg mr-2 w-11 h-full m-2 font-medium'>Edit</button>
-
-                        </div>)
-
-                  })
-
-                ) : (
-                  value.map((unique, idx) => (
-                    <div key={idx} className=" ">
-                      <p className=' py-2 px-3 text-gray-300  '>{unique}</p>
-                    </div>
-                  ))
-
-                )}
-              </div>
-            ) : (
-              <div key={index} className="bg-tranparent rounded-lg overflow-hidden shadow ">
-                <div className="font-semibold text-gray-900 mb-4">
-                  {field.charAt(0).toUpperCase() + field.slice(1)}
-                </div>
-                <p className='px-3 py-2 bg-white rounded-md border text-sm text-gray-900 '>{value}</p>
-              </div>
-            );
-
-
-
-          })}
-          {
-            Acode.length > 0 && (
-              <div className=" flex flex-col gap-3">
-                <h1 className='text-xl font-extrabold text-blue-600'>A codes</h1>
-                {Acode.map((code, index) => (
-                  <div key={index} className="bg-gray-800  flex px-2 py-2 font-mono font-bold">
-                    <h1>{code}</h1>
-                  </div>
-                ))}
-              </div>
-            )
-          }
-
-
-        </div>
-        <div>
-          <button onClick={handleARcode}>Click</button>
-          
-        </div>
-        <div>
-          <textarea className='bg-gray-900 w-full min-h-96' value={formattedDescription}></textarea>
-        </div>
-        {materialGrid.length>0 &&(
-          <div>
-          <table className='border w-full justify-between'>
-            {/*Table Header */}
-            <thead className='w-full tracking-wide text-blue-500  '>
-              <tr >
-                <th className='border'>Event</th>
-                <th className='border'>Code</th>
-                <th className='border'>AsReportedcode</th>
-                <th className='border'>A code</th>
-              </tr>
-            </thead>
-            {/* Table Body */}
-            <tbody className='w-full'>
-              {materialGrid.map((code,index)=>(
-                 <tr key={index}>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{index+1}</td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.dtcode}<button className='border px-4 bg-red-600'>Edit</button></td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.ascode}</td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.arcode}</td>
-               </tr>
-              ))}
-             
-            
-            </tbody>
-
-          </table>
-        </div>
+      {Output &&(
+       <section className=' bg-white rounded-xl overflow-hidden text-gray-100 m-11 font-medium' >
+        {formattedDescription &&(
+ <header className='bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4'>
+           <h1 className='text-xl font-semibold text-white flex items-center'>
+             <CircleCheck className='w-5 h-5 mr-2'/>
+             AI Analysis Results
+           </h1>
+           <p className='className="text-green-100 text-sm mt-1'>
+           Complete incident analysis generated by AI
+           </p>
+       </header>
         )}
-        
+      
 
-      </section >
+       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 bg-slate-100  '>
+         {Object.entries(Output).map(([field, value], index) => {
+           return Array.isArray(value) ? (
+             <div className="bg-transparent rounded-lg overflow-hidden shadow divide-y divide-gray-700  ">
+
+               <div className="px-4 py-4 bg-blue-500 border-blue-500 text-blue-400   rounded-lg bg-opacity-25 text-xl  ">
+                 {field.charAt(0).toUpperCase() + field.slice(1)}
+               </div>
+              
+               {field === "Mapped Codes" ? (
+                 value.map((unique, idx) => {
+                   if (unique)
+                     return (
+                       <div key={idx} className=" flex justify-between">
+
+                         <h1 className='py-2 px-3 text-gray-300 font-medium  '>{unique}</h1>
+                         <button onClick={() => handleARcode} className='bg-red-500 rounded-lg mr-2 w-11 h-full m-2 font-medium'>Edit</button>
+
+                       </div>)
+
+                 })
+
+               ) : (
+                 value.map((unique, idx) => (
+                   <div key={idx} className=" ">
+                     <p className=' py-2 px-3 text-gray-300  '>{unique}</p>
+                   </div>
+                 ))
+
+               )}
+             </div>
+           ) : (
+             
+             <div key={index} className="px-3 py-2 m-3 ">
+               <div className="text-xs font-medium text-gray-600 mb-2">
+                 {field.charAt(0).toUpperCase() + field.slice(1)}
+               </div>
+               <p className='px-3 py-2 bg-white rounded-md  text-sm text-gray-900 '>{value}</p>
+             </div>
+           );
+
+
+
+         })}
+         {
+           Acode.length > 0 && (
+             <div className=" flex flex-col gap-3">
+               <h1 className='text-xl font-extrabold text-blue-600'>A codes</h1>
+               {Acode.map((code, index) => (
+                 <div key={index} className="bg-gray-800  flex px-2 py-2 font-mono font-bold">
+                   <h1>{code}</h1>
+                 </div>
+               ))}
+             </div>
+           )
+         }
+          {formattedDescription && (
+           <div className='w-full'>
+             <h1 className='text-xs font-medium text-gray-600 mb-2'>Entry Description</h1>
+           <textarea className='bg-white text-gray-600 w-full min-h-96' value={formattedDescription}></textarea>
+           </div>
+       )}
+
+
+       </div>
+       <div>
+         <button onClick={handleARcode}>Click</button>
+         
+       </div>
+      
+      
+       {materialGrid.length>0 &&(
+         <div>
+         <table className='border w-full justify-between'>
+           {/*Table Header */}
+           <thead className='w-full tracking-wide text-blue-500  '>
+             <tr >
+               <th className='border'>Event</th>
+               <th className='border'>Code</th>
+               <th className='border'>AsReportedcode</th>
+               <th className='border'>A code</th>
+             </tr>
+           </thead>
+           {/* Table Body */}
+           <tbody className='w-full'>
+             {materialGrid.map((code,index)=>(
+                <tr key={index}>
+                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{index+1}</td>
+                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.dtcode}<button className='border px-4 bg-red-600'>Edit</button></td>
+                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.ascode}</td>
+                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.arcode}</td>
+              </tr>
+             ))}
+            
+           
+           </tbody>
+
+         </table>
+       </div>
+       )}
+       
+
+     </section >)}
+     
     </div>
 
   )
