@@ -130,6 +130,11 @@ Ensure the Reported Issue field clearly separates distinct issues into numbered 
 
 JSON Output Structure:
 {
+
+"Awareness Date": "Extract the date when the issue was first reported to BD (i.e., when a BD employee, identified by an email ending in '@bd.com', received the complaint). This is the date BD became aware of the issue. Format the date as MM/DD/YYYY. If no such date is found, return 'Unknown'."
+"Complaint Date Received": "Extract the date when the BD complaints team (identified by the email 'productcomplaints@bd.com') received the complaint. This is the official complaint receipt date. Format the date as MM/DD/YYYY. If no such date is found, return 'Unknown'."
+},
+"Customer Name": "Extract the name of the facility, hospital, or organization that is experiencing the issue. If not found, return 'Unknown'. Dont apply PHI policy here. Give the exact name",
 "Material": "Extract the material number or product code. If no information is found, return 'Unknown'.",
 "Lot": "Extract the batch or lot number. If no information is found, return 'Unknown'.",
 "Date of Event": Extract the date of the incident from the provided text. The date should be in MM/DD/YYYY format. If the date is incomplete or informal (e.g., '12-5'), interpret it as best as possible based on the context (e.g., '12-5' could mean 12/05/YYYY). If no year is specified, assume the current year. If the text mentions 'today' or 'yesterday', calculate the corresponding date based on the current date. If no valid date can be determined, return 'Unknown'.",
@@ -139,6 +144,11 @@ JSON Output Structure:
 Material # [found material number or 'Unknown'] Batch # [found batch number or 'Unknown']It was reported by the customer that the [rephrased reported issue]Verbatim:[Paste the full initial_info text below after removing all PHI (Protected Health Information). This includes masking or removing personal names, organization names, locations, contact details, or any other identifiable information. Replace all PHI with '***'. Ensure that the entire content of initial_info is retained after PHI masking, with nothing omitted or summarized]",
 "No of issues": "Count the number of distinct issues stated in the 'Reported Issue' field. Return the exact count as a number (e.g., 1, 2, 3). If no issues are mentioned, return 0.",
 "Email id": "Extract the email address mentioned for further communication. If no email is found, return 'Unknown'.",
+
+"Initial Reporter Name": "Extract the name of the person reporting the issue to BD check for the BD email od in the email loop . If not found, return 'Unknown'.",
+"Initial Reporter Address": "Extract the address of the person reporting the issue. If not found, return 'Unknown'.",
+"Initial Reporter Phone Number": "Extract the phone number of the person reporting the issue. If not found, return 'Unknown'.",
+"Initial Reporter Zip Code": "Extract the zip code of the person reporting the issue. If not found, return 'Unknown'.",
 "Reported Issue": "Summarize each issue reported by the customer as a numbered list. If multiple issues are mentioned, clearly separate them into distinct points.",
 "Patient Harm": "Indicate whether there was any harm to the patient or healthcare professional. If yes, provide details. If no harm is mentioned, return 'No harm reported.'",
 "Follow-up Questions": ["Generate a list of follow-up questions to gather additional information."],
@@ -152,6 +162,10 @@ Complaint Description: ${initial_info}
 
 Example Output:
 {
+
+"Awareness Date": "06/25/2025"
+"Complaint Date Received" : "06/26/2025",
+"Customer Name" : "Pointcare",
 "Material": "ME2010",
 "Lot": "Unknown",
 "Date of Event": "Unknown",
@@ -169,7 +183,10 @@ Example Output:
 "Was there any harm to the patient or healthcare professional?",
 "Is a sample available for investigation?"
 ],
-
+"Initial Reporter Name": "John Doe",
+"Initial Reporter Address": "123 Main Street, Springfield, IL",
+"Initial Reporter Phone Number": "555-123-4567",
+"Initial Reporter Zip Code": "62704",
 "Explanation": "This complaint is about a disposable IV infusion set. The issue occurred during 'priming', which means preparing the IV set by removing all air before use. The 'drip chamber' is a clear plastic part that helps control how fast the fluid drips. It must fill to a certain level for the device to work correctly. In this case, the drip chamber was not filling properly, even after several tries. As a result, air bubbles got into the tubing. This can be unsafe because air bubbles in IV lines can be harmful if they enter the patient’s bloodstream. However, the nurse caught the issue and replaced the IV set. In simple terms: The part of the IV set that shows the drip didn’t fill properly. This caused air to get into the tube, so the nurse used a new one instead",
 "Mapped Codes": [
 "TUBING STUCK WHEN CONNECTED TO IV OR T-PIECE SET",
