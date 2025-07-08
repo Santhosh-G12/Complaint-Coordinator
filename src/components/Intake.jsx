@@ -9,19 +9,27 @@ import PropTypes from 'prop-types'
 import { AppContext } from '../App.jsx';
 import NewEvents from '../NewEvents.json'
 import Master from '../Master.json'
-import {FileText, TriangleAlert, Package,  CircleCheck } from 'lucide-react'
+import { FileText, TriangleAlert, Package, CircleCheck, SearchIcon, XIcon } from 'lucide-react'
+import RawPrompt from '../prompt'
+import { handleARcode } from '../utilities';
 
 
 function Intake() {
 
   const apiKey = '031a052329241fa8365571d6e816ab01824905f89adac9875c66f54d858e5283'
   const { asReportedcode, setasReportedcode, selectedproduct, setselectedproduct, initial_info, setinitial_info, Output, setOutput, isNewversion, setisNewversion } = useContext(AppContext)
+  const asAnalysed_Codes = asReportedcode
   const [loading, setloading] = useState(false)
   const [filteredevent_types, setfilteredevent_types] = useState({})
+  const [searchResult, setsearchResult] = useState([])
   const [Acode, setAcode] = useState([])
   const [source, setSource] = useState(Master)
   const [materialGrid, setmaterialGrid] = useState([])
-  const [formattedDescription,setformattedDescription] = useState("")
+  const [formattedDescription, setformattedDescription] = useState("")
+  const [isOpened, setisOpened] = useState(true)
+  const [typedcode, settyped] = useState("")
+  const [ChangableIndex, setChangableIndex] = useState("")
+  const [isaddClicked,setisaddClicked] = useState(false)
   useEffect(() => {
     if (!isNewversion) {
       setSource(() => CPR)
@@ -79,121 +87,38 @@ function Intake() {
 
   }, [asReportedcode])
 
+  function search(filteredevent_types, e) {
+    if (!filteredevent_types) {
+      return
+    }
+    const typed_word = e.target.value
+    settyped(typed_word)
+    const filter = filteredevent_types.filter((item) => item.toLowerCase().includes(typed_word.toLowerCase()))
+    setsearchResult(filter)
 
-  //Process of Retriving As Reported code 
-  function handleARcode() {
-    let res = []
-    
-    for (const code of asReportedcode) {
-    
+  }
+  function handleChangeReportedCodes(newcode, index) {
+    console.log(newcode, index)
+    asa[ChangableIndex] = newcode
+    console.log(asReportedcode)
 
-      const arCode = Master[selectedproduct][code]["As Reported/As Analyzed Code 1"]
-      const ascode = Master[selectedproduct][code]["IMDRF Annex A (Problem) Code & Definition"]
-      
-      let rese = {
-        "dtcode" : code,
-        "arcode": arCode,
-        "ascode": ascode
-      }
-      res.push(rese)}
-    setmaterialGrid(res)
-    console.log(materialGrid)
+
+
+  }
+  function handleAddReportedCode(code) {
+    asAnalysed_Codes.push(code)
   }
 
+  function IndexPasser(index) {
+    setChangableIndex(index)
 
-
-
-
-
-
-
+  }
 
 
   const hitter = async () => {
     setloading(true)
-    const prompt = `Extract the following information from the complaint description below and return
-  ONLY a valid JSON object. Do NOT include any additional text, explanations, or formatting (e.g., Markdown backticks, unexpected tokens). Use the exact structure and default values provided below:
+    const newprompt = RawPrompt.replace("{{Event Type}}", filteredevent_types).replace("{{initial info}}", initial_info)
 
-PHI POLICY:
-Before placing any text in the "verbatim" field, **remove all PHI (Protected Health Information)**. This includes:
-- Personal names (e.g., doctors, nurses, patients) → Replace with "***"
-- Organization names (e.g., hospitals, manufacturers) → Replace with "***"
-- Locations (e.g., cities, wings, room numbers, etc.) → Replace with "***" unless medically relevant
-- Emails and phone numbers → Replace with "***"
-- Any indirect identifiers
-
-Additional Guidelines:
-Understand the complaint in depth to avoid misinterpretation, as errors may cause serious problems for our team.
-Identify as many distinct issues as possible from the complaint description.
-Map each reported issue ONLY to the predefined codes listed in the Filtered Event Types. Do not create or assume new codes. If no exact match is found, return "NA".
-Ensure the Reported Issue field clearly separates distinct issues into numbered points.
-
-JSON Output Structure:
-{
-
-"Awareness Date": "Extract the date when the issue was first reported to BD (i.e., when a BD employee, identified by an email ending in '@bd.com', received the complaint). This is the date BD became aware of the issue. Format the date as MM/DD/YYYY. If no such date is found, return 'Unknown'."
-"Complaint Date Received": "Extract the date when the BD complaints team (identified by the email 'productcomplaints@bd.com') received the complaint. This is the official complaint receipt date. Format the date as MM/DD/YYYY. If no such date is found, return 'Unknown'."
-},
-"Customer Name": "Extract the name of the facility, hospital, or organization that is experiencing the issue. If not found, return 'Unknown'. Dont apply PHI policy here. Give the exact name",
-"Material": "Extract the material number or product code. If no information is found, return 'Unknown'.",
-"Lot": "Extract the batch or lot number. If no information is found, return 'Unknown'.",
-"Date of Event": Extract the date of the incident from the provided text. The date should be in MM/DD/YYYY format. If the date is incomplete or informal (e.g., '12-5'), interpret it as best as possible based on the context (e.g., '12-5' could mean 12/05/YYYY). If no year is specified, assume the current year. If the text mentions 'today' or 'yesterday', calculate the corresponding date based on the current date. If no valid date can be determined, return 'Unknown'.",
-"Sample Information": "Determine whether a sample is available for investigation based on the provided information. If the complaint explicitly mentions that the product was thrown away, discarded, disposed of, destroyed, given away, returned, lost, or otherwise made inaccessible, return 'No sample available due to disposal.' If the customer uses phrases indicating the product has been retained (e.g., 'saved the product,' 'kept the product,' 'set aside the product,' 'sequestered the product,' 'preserved the product,' 'stored the product,' 'retained the product,' 'kept it for testing,' 'put it away'), return 'Sample available for investigation.' If there is no clear indication of sample availability or disposal, return 'Unknown.",
-"Entry Description":
-"Format this field as:
-Material # [found material number or 'Unknown'] Batch # [found batch number or 'Unknown']It was reported by the customer that the [rephrased reported issue]Verbatim:[Paste the full initial_info text below after removing all PHI (Protected Health Information). This includes masking or removing personal names, organization names, locations, contact details, or any other identifiable information. Replace all PHI with '***'. Ensure that the entire content of initial_info is retained after PHI masking, with nothing omitted or summarized]",
-"No of issues": "Count the number of distinct issues stated in the 'Reported Issue' field. Return the exact count as a number (e.g., 1, 2, 3). If no issues are mentioned, return 0.",
-"Email id": "Extract the email address mentioned for further communication. If no email is found, return 'Unknown'.",
-
-"Initial Reporter Name": "Extract the name of the person reporting the issue to BD check for the BD email od in the email loop . If not found, return 'Unknown'.",
-"Initial Reporter Address": "Extract the address of the person reporting the issue. If not found, return 'Unknown'.",
-"Initial Reporter Phone Number": "Extract the phone number of the person reporting the issue. If not found, return 'Unknown'.",
-"Initial Reporter Zip Code": "Extract the zip code of the person reporting the issue. If not found, return 'Unknown'.",
-"Reported Issue": "Summarize each issue reported by the customer as a numbered list. If multiple issues are mentioned, clearly separate them into distinct points.",
-"Patient Harm": "Indicate whether there was any harm to the patient or healthcare professional. If yes, provide details. If no harm is mentioned, return 'No harm reported.'",
-"Follow-up Questions": ["Generate a list of follow-up questions to gather additional information."],
-"Explanation": "Explain the issue in clear, non-technical language so someone without a medical background can understand. Break down the device's function (e.g., what a plunger or drip chamber does), describe what went wrong, and how it could impact use. Define technical terms in context. End with a plain summary beginning with 'In simple terms:' to recap the issue in everyday words.",
-"Mapped Codes": "Map the reported issues ONLY to the exact predefined codes listed in the Filtered Event Types. Do not assume, infer, or create new codes under any circumstances. If no match is found between the reported issue and the predefined codes, return an empty array ([]). Ensure that all mappings are case-sensitive and match the predefined codes exactly as they appear in the Filtered Event Types list.}
-
-Inputs:
-
-FilteredEventTypes:${filteredevent_types}
-Complaint Description: ${initial_info}
-
-Example Output:
-{
-
-"Awareness Date": "06/25/2025"
-"Complaint Date Received" : "06/26/2025",
-"Customer Name" : "Pointcare",
-"Material": "ME2010",
-"Lot": "Unknown",
-"Date of Event": "Unknown",
-"Sample Information": "Unknown",
-"No of issues": 2,
-"Email id": "Unknown",
-"Patient Harm": "No harm reported.",
-"Entry Description": "Material : ME2010       Batch : Unknown IMaterial # ME2010 Batch # Unknown It was reported by the customer that the drip chamber on the IV infusion set was not filling properly during priming, leading to air bubbles entering the line. The issue was resolved by replacing the set. Verbatim: The nurse reported that the IV infusion set drip chamber was not filling properly during priming. Despite multiple attempts, the fluid level remained low and inconsistent, causing air bubbles to enter the line. The set was replaced, and the issue did not recur ",
-"Reported Issue": [
-"1. The drip chamber did not fill properly during priming.",
-    "2. Air bubbles entered the IV line due to improper priming.
-],
-"Follow-up Questions": [
-"Can you confirm the date of the event?",
-"Was there any harm to the patient or healthcare professional?",
-"Is a sample available for investigation?"
-],
-"Initial Reporter Name": "John Doe",
-"Initial Reporter Address": "123 Main Street, Springfield, IL",
-"Initial Reporter Phone Number": "555-123-4567",
-"Initial Reporter Zip Code": "62704",
-"Explanation": "This complaint is about a disposable IV infusion set. The issue occurred during 'priming', which means preparing the IV set by removing all air before use. The 'drip chamber' is a clear plastic part that helps control how fast the fluid drips. It must fill to a certain level for the device to work correctly. In this case, the drip chamber was not filling properly, even after several tries. As a result, air bubbles got into the tubing. This can be unsafe because air bubbles in IV lines can be harmful if they enter the patient’s bloodstream. However, the nurse caught the issue and replaced the IV set. In simple terms: The part of the IV set that shows the drip didn’t fill properly. This caused air to get into the tube, so the nurse used a new one instead",
-"Mapped Codes": [
-"TUBING STUCK WHEN CONNECTED TO IV OR T-PIECE SET",
-"TUBING BREAKS OFF COMPLETELY WHEN REMOVED"
-]
-}     
-`;
 
     try {
       const response = await fetch("https://api.together.ai/v1/chat/completions", {
@@ -204,7 +129,7 @@ Example Output:
         },
         body: JSON.stringify({
           model: "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-          messages: [{ role: "user", content: prompt }],
+          messages: [{ role: "user", content: newprompt }],
           max_tokens: 1000,
         })
       })
@@ -217,27 +142,27 @@ Example Output:
       const parseddata = JSON.parse(aiResponse)
       if (parseddata["Entry Description"]) {
         let description = parseddata["Entry Description"];
-    
-    // Find "It was reported" and insert line breaks before it
+
+        // Find "It was reported" and insert line breaks before it
         description = description.replace(
-       /Batch # [^\s]+/, 
-    match => `${match}\n\n`
-    );
-    
-    // Find "verbatim:" and insert line breaks before it
-          description = description.replace(
-        "Verbatim:", 
-        "\n\nVerbatim:\n"
+          /Batch # [^\s]+/,
+          match => `${match}\n\n`
+        );
 
-        
-    )
+        // Find "verbatim:" and insert line breaks before it
+        description = description.replace(
+          "Verbatim:",
+          "\n\nVerbatim:\n"
 
-    setformattedDescription(description);
-    } else {
+
+        )
+
+        setformattedDescription(description);
+      } else {
         console.error("Entry Description is undefined in the response:", formattedDescription);
         // Handle the missing field appropriately
-    }
-      
+      }
+
       setOutput(parseddata)
       const finded_codes = parseddata["Mapped Codes"] || []
       setasReportedcode(finded_codes)
@@ -255,10 +180,7 @@ Example Output:
     }
   }
 
-  function clear() {
-    setOutput('')
-    setinitial_info('')
-  }
+
 
 
 
@@ -272,34 +194,102 @@ Example Output:
 
       {/* Input Field */}
       <section className="  flex flex-col  justify-center   lg:m-12    bg-white rounded-xl shadow-lg border border-gray-200 ">
+        {/*Search Modal */}
+        {isOpened &&
+          <div className=' fixed inset-0 z-50 flex items-center justify-center bg-green-50 bg-opacity-50 border text-gray-700 '>
+            <div className='bg-white border h-[50vh] w-[60vh]'>
+              <div className='flex justify-center items-center bg-white m-3 rounded-lg '>
+                <SearchIcon className='text-gray-500 ' />
+                <input
+
+                  className='w-full text-gray-700  m-3 space-x-3 border-none outline-none'
+                  onChange={(e) => search(filteredevent_types, e)}
+                  value={typedcode}
+                  placeholder='Enter your code'
+                />
+                <XIcon onClick={() => setisOpened(false)} />
+              </div>
+
+              <div className='overflow-y-scroll border max-h-full'>
+                {searchResult.length === 0 ?
+                  <div className=' allEvents text-gray-600 w-full '>
+                    {selectedproduct &&
+                      NewEvents[selectedproduct].map((events, index) => (
+                        <h1 className='hover:bg-blue-300 rounded-md p-2' 
+                          onClick={() => {
+                        if(isaddClicked){
+                          handleAddReportedCode(code)
+                          setisOpened(false)
+                          setisaddClicked(false)
+                        }
+                        {
+                          handleChangeReportedCodes(code, index)
+                          setisOpened(false)  
+                        }                          }} 
+                          key={index}>
+                          {events}</h1>
+                      ))}
+                  </div> :
+                  <div className='searchResult'>
+                    {searchResult.length > 0 && searchResult.map((code, index) => (
+                      <h1 className='hover:bg-blue-300 rounded-md p-2' onClick={() => 
+                       {if(isaddClicked){
+                          handleAddReportedCode(code)
+                          setisOpened(false)
+                          setisaddClicked(false)
+                        }
+                        {
+                          handleChangeReportedCodes(code, index)
+                          setisOpened(false)  
+                        }
+                        
+                      } }
+                        key={index}>{code}</h1>
+                    ))}
+                  </div>
+
+                }
+
+
+
+
+              </div>
+
+
+            </div>
+
+          </div>}
+
+
+
         <header className='bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 block rounded-xl'>
-         
+
           <h1 className='text-xl flex items-center font-semibold'>
             <FileText className="w-5 h-5 mr-2" />
             Incident Intake Form</h1>
           <p className='text-blue-100 text-sm mt-1'>Provide initial incident details for AI analysis</p>
-          </header>
+        </header>
 
-        <div className='p-6'> 
+        <div className='p-6'>
           <div className='space-y-6'>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <TriangleAlert className='w-4 h-4 inline   mr-1 text-orange-500'/>
+              <TriangleAlert className='w-4 h-4 inline   mr-1 text-orange-500' />
               Incident Description *</label>
           </div>
-         
-        <textarea className="w-full px-4 py-3 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none disabled:bg-gray-50 disabled:text-gray-500"
-          onChange={(e) => setinitial_info(e.target.value)}
-          value={initial_info}
-          placeholder="Describe the incident in detail (e.g., 'bent needle discovered during use')..."
-        /></div>
-        
+
+          <textarea className="w-full px-4 py-3 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none disabled:bg-gray-50 disabled:text-gray-500"
+            onChange={(e) => setinitial_info(e.target.value)}
+            value={initial_info}
+            placeholder="Describe the incident in detail (e.g., 'bent needle discovered during use')..."
+          /></div>
+
 
         <div className='text-white w-full font-medium border-gray-500 focus:border-blue-500 focus:border-5'>
           {!isNewversion ?
             <div className='p-6'>
-            <label htmlFor="dropdown" className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-2  '>
-              <Package className='text-blue-500 '/>
-              Affected Product *</label>              <select id="dropdown" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" value={selectedproduct} onChange={(e) => setselectedproduct(e.target.value)}>
+              <label htmlFor="dropdown" className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-2  '>
+                <Package className='text-blue-500 ' />
+                Affected Product *</label>              <select id="dropdown" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" value={selectedproduct} onChange={(e) => setselectedproduct(e.target.value)}>
                 <option >Select your Product - Old </option>
                 <option value="CPR-130-ISD-001 - Alaris and Gemini Infusion Sets">ISD 1 - Alaris</option>
                 <option value="CPR-130-ISD-002 - Extension Sets">ISD 2 - Extenstion sets</option>
@@ -337,9 +327,9 @@ Example Output:
             </div>
             :
             <div className='p-6'>
-                <label htmlFor="dropdown" className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-2  '>
-                  <Package className='text-blue-500 '/>
-                  Affected Product *</label>              <select id="dropdown" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" value={selectedproduct} onChange={(e) => setselectedproduct(e.target.value)}>
+              <label htmlFor="dropdown" className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-2  '>
+                <Package className='text-blue-500 ' />
+                Affected Product *</label>              <select id="dropdown" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" value={selectedproduct} onChange={(e) => setselectedproduct(e.target.value)}>
                 <option className='font-light' >Select your Product</option>
                 <option value="Hypodermic">Hypodermic</option>
                 <option value="Anesthesia">Anesthesia</option>
@@ -355,138 +345,152 @@ Example Output:
 
         </div>
         <div className='p-6 w-full'>
-          <button className={initial_info ? " w-full  bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-xl shadow-md transition duration-200  h-14   p-2 text-lg" :" w-full px-4 py-1 bg-[#cccccc] bg-opacity-70 text-[#666666] cursor-not-allowed font-bold rounded-2xl p-2 text-lg h-14 "} disabled={initial_info ? false : true} onClick={hitter}>
-              {loading ? <CircularProgress /> : "Analyse with AI"}
+          <button className={initial_info ? " w-full  bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-xl shadow-md transition duration-200  h-14   p-2 text-lg" : " w-full px-4 py-1 bg-[#cccccc] bg-opacity-70 text-[#666666] cursor-not-allowed font-bold rounded-2xl p-2 text-lg h-14 "} disabled={initial_info ? false : true} onClick={hitter}>
+            {loading ? <CircularProgress /> : "Analyse with AI"}
 
-            </button>
+          </button>
 
-            
-            <button className='bg-gray-200 font-bold rounded-2xl p-2 text-lg h-14 w-28 mt-5 ' onClick={() => setisNewversion(prev => !prev)}>Change</button>
+
+          <button className='bg-gray-200 font-bold rounded-2xl p-2 text-lg h-14 w-28 mt-5 ' onClick={() => setisNewversion(prev => !prev)}>Change</button>
         </div>
-         
-       
+
+
       </section>
 
       {/* Results Fields*/}
-      {Output &&(
-       <section className=' bg-white rounded-xl overflow-hidden text-gray-100 m-11 font-medium' >
-        {formattedDescription &&(
- <header className='bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4'>
-           <h1 className='text-xl font-semibold text-white flex items-center'>
-             <CircleCheck className='w-5 h-5 mr-2'/>
-             AI Analysis Results
-           </h1>
-           <p className='className="text-green-100 text-sm mt-1'>
-           Complete incident analysis generated by AI
-           </p>
-       </header>
-        )}
-      
-
-       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 bg-slate-100  '>
-         {Object.entries(Output).map(([field, value], index) => {
-           return Array.isArray(value) ? (
-             <div className="bg-transparent rounded-lg overflow-hidden shadow divide-y divide-gray-700  ">
-
-               <div className="px-4 py-4 bg-blue-500 border-blue-500 text-blue-400   rounded-lg bg-opacity-25 text-xl  ">
-                 {field.charAt(0).toUpperCase() + field.slice(1)}
-               </div>
-              
-               {field === "Mapped Codes" ? (
-                 value.map((unique, idx) => {
-                   if (unique)
-                     return (
-                       <div key={idx} className=" flex justify-between">
-
-                         <h1 className='py-2 px-3 text-gray-300 font-medium  '>{unique}</h1>
-                         <button onClick={() => handleARcode} className='bg-red-500 rounded-lg mr-2 w-11 h-full m-2 font-medium'>Edit</button>
-
-                       </div>)
-
-                 })
-
-               ) : (
-                 value.map((unique, idx) => (
-                   <div key={idx} className=" ">
-                     <p className=' py-2 px-3 text-gray-300  '>{unique}</p>
-                   </div>
-                 ))
-
-               )}
-             </div>
-           ) : (
-             
-             <div key={index} className="px-3 py-2 m-3 ">
-               <div className="text-xs font-medium text-gray-600 mb-2">
-                 {field.charAt(0).toUpperCase() + field.slice(1)}
-               </div>
-               <p className='px-3 py-2 bg-white rounded-md  text-sm text-gray-900 '>{value}</p>
-             </div>
-           );
-
-
-
-         })}
-         {
-           Acode.length > 0 && (
-             <div className=" flex flex-col gap-3">
-               <h1 className='text-xl font-extrabold text-blue-600'>A codes</h1>
-               {Acode.map((code, index) => (
-                 <div key={index} className="bg-gray-800  flex px-2 py-2 font-mono font-bold">
-                   <h1>{code}</h1>
-                 </div>
-               ))}
-             </div>
-           )
-         }
+      {Output && (
+        <section className=' bg-white rounded-xl overflow-hidden text-gray-100 m-11 font-medium' >
           {formattedDescription && (
-           <div className='w-full'>
-             <h1 className='text-xs font-medium text-gray-600 mb-2'>Entry Description</h1>
-           <textarea className='bg-white text-gray-600 w-full min-h-96' value={formattedDescription}></textarea>
-           </div>
-       )}
+            <header className='bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4'>
+              <h1 className='text-xl font-semibold text-white flex items-center'>
+                <CircleCheck className='w-5 h-5 mr-2' />
+                AI Analysis Results
+              </h1>
+              <p className='className="text-green-100 text-sm mt-1'>
+                Complete incident analysis generated by AI
+              </p>
+            </header>
+          )}
 
 
-       </div>
-       <div>
-         <button onClick={handleARcode}>Click</button>
-         
-       </div>
-      
-      
-       {materialGrid.length>0 &&(
-         <div>
-         <table className='border w-full justify-between'>
-           {/*Table Header */}
-           <thead className='w-full tracking-wide text-blue-500  '>
-             <tr >
-               <th className='border'>Event</th>
-               <th className='border'>Code</th>
-               <th className='border'>AsReportedcode</th>
-               <th className='border'>A code</th>
-             </tr>
-           </thead>
-           {/* Table Body */}
-           <tbody className='w-full'>
-             {materialGrid.map((code,index)=>(
-                <tr key={index}>
-                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{index+1}</td>
-                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.dtcode}<button className='border px-4 bg-red-600'>Edit</button></td>
-                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.ascode}</td>
-                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.arcode}</td>
-              </tr>
-             ))}
-            
-           
-           </tbody>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 bg-slate-100  '>
+            {Object.entries(Output).map(([field, value], index) => {
+              return Array.isArray(value) ? (
+                <div className="bg-transparent rounded-lg overflow-hidden shadow divide-y divide-gray-700  ">
 
-         </table>
-       </div>
-       )}
-       
+                  <div className="px-4 py-4 bg-blue-500 border-blue-500 text-blue-400   rounded-lg bg-opacity-25 text-xl  ">
+                    {field.charAt(0).toUpperCase() + field.slice(1)}
+                  </div>
 
-     </section >)}
-     
+                  {field === "Mapped Codes" ? (
+                    <div>
+                      <button
+                      className='bg-blue-500'
+                      onClick={()=>{
+                        setisOpened(true),
+                        setisaddClicked(true)
+                      }}
+                      >Add</button>
+
+                        {value.map((unique, idx) => {
+                      if (unique)
+                        return (
+                          <div key={idx} className=" flex justify-between">
+                           
+                            <h1 className='py-2 px-3 text-gray-300 font-medium  '>{unique}</h1>
+                            <button onClick={() => { handleARcode, setisOpened(true), IndexPasser(idx) }} className='bg-red-500 rounded-lg mr-2 w-11 h-full m-2 font-medium'>Edit</button>
+
+                          </div>)
+
+                    })
+                        }
+                    </div>
+                
+
+                  ) : (
+                    value.map((unique, idx) => (
+                      <div key={idx} className=" ">
+                        <p className=' py-2 px-3 text-gray-300  '>{unique}</p>
+                      </div>
+                    ))
+
+                  )}
+                </div>
+              ) : (
+
+                <div key={index} className="px-3 py-2 m-3 ">
+                  <div className="text-xs font-medium text-gray-600 mb-2">
+                    {field.charAt(0).toUpperCase() + field.slice(1)}
+                  </div>
+                  <p className='px-3 py-2 bg-white rounded-md  text-sm text-gray-900 '>{value}</p>
+                </div>
+              );
+
+
+
+            })}
+            {
+              Acode.length > 0 && (
+                <div className=" flex flex-col gap-3">
+                  <h1 className='text-xl font-extrabold text-blue-600'>A codes</h1>
+                  {Acode.map((code, index) => (
+                    <div key={index} className="bg-gray-800  flex px-2 py-2 font-mono font-bold">
+                      <h1>{code}</h1>
+                    </div>
+                  ))}
+                </div>
+              )
+            }
+            {formattedDescription && (
+              <div className='w-full'>
+                <h1 className='text-xs font-medium text-gray-600 mb-2'>Entry Description</h1>
+                <textarea className='bg-white text-gray-600 w-full min-h-96' value={formattedDescription}></textarea>
+              </div>
+            )}
+
+
+          </div>
+          <div>
+            <button className="bg-red" onClick={handleARcode}>Click</button>
+
+          </div>
+
+
+          {materialGrid.length > 0 && (
+            <div>
+              <table className='border w-full justify-between'>
+                {/*Table Header */}
+                <thead className='w-full tracking-wide text-blue-500  '>
+                  <tr >
+                    <th className='border'>Event</th>
+                    <th className='border'>Code</th>
+                    <th className='border'>AsReportedcode</th>
+                    <th className='border'>A code</th>
+                  </tr>
+                </thead>
+                {/* Table Body */}
+                <tbody className='w-full'>
+                  {materialGrid.map((code, index) => (
+                    <tr key={index}>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{index + 1}</td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.dtcode}<button className='border px-4 bg-red-600'>Edit</button></td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.ascode}</td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200 border text-wrap'>{code.arcode}</td>
+                    </tr>
+                  ))}
+
+
+                </tbody>
+
+              </table>
+            </div>
+          )}
+
+
+
+
+        </section >)}
+
     </div>
 
   )

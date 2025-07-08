@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { AppProvider } from './App.jsx'; // Import both App and AppProvider
+import {AppProvider} from './App.jsx'; // Import both App and AppProvider
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
